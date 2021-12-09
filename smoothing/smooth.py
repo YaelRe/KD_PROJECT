@@ -46,9 +46,12 @@ class Smooth:
     #     return self.forward(x)
 
     def predict(self, x, output, maxk, calc_prob=False):
+        print("-----------------> IN smooth.py/predict()")
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
-
+        print("-----------------> outputs =", outputs, "\n")
+        print("-----------------> hist =", hist, "\n")
+        print("-----------------> predict =", predict, "\n")
         pred_prob = -1
         pred_prob_var = -1
         if calc_prob:
@@ -114,6 +117,7 @@ class Smooth:
     def base_model_predict(self, x, maxk, pred):
         return pred
 
+    # TODO: is histogram what we need?
     def generate_histogram(self, outputs, maxk, m_hist):
         predictions = [output.topk(maxk, 1, True, True) for output in outputs]
         predictions = [pred.unsqueeze(dim=2) for _, pred in predictions]

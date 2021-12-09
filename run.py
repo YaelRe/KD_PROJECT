@@ -107,6 +107,7 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
            calc_prob=False, test_batch_idx=0):
+    print("-----------------> IN run.py/attack()")
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -295,9 +296,10 @@ def test(model, loader, criterion, writer, iter, experiment_name, logger, epoch,
 
 def correct(model, data, output, target, topk=(1,), calc_prob=False):
     """Computes the correct@k for the specified values of k"""
-
+    print("-----------------> IN run.py/correct()")
     # time_stamp_start = datetime.now()
     maxk = max(topk)
+    print("-----------------> maxk =", maxk)
     pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob)
     radius = -1
     pred = pred.t().type_as(target)
