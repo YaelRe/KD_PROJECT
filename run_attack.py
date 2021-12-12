@@ -333,10 +333,7 @@ def main():
 
     model, val_loader, criterion = init_hyper_params(args, add_args, noise_sd, m_forward, logger, device, dtype)
 
-    add_attack_params = {}
-    add_attack_params['k'] = args.attack_k
-    add_attack_params['alpha'] = args.alpha
-    att_object = args.attack(model, criterion, **add_attack_params)
+    att_object = args.attack(model, criterion, **args.attacks_add_params[0])
 
     att_objects = None
     if not args.multi_att:
