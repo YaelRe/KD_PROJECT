@@ -49,9 +49,10 @@ class Smooth:
         print("-----------------> IN smooth.py/predict()")
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
-        print("-----------------> outputs =", outputs, "\n")
-        print("-----------------> hist =", hist, "\n")
-        print("-----------------> predict =", predict, "\n")
+
+        # print("-----------------> outputs =", outputs, "\n")
+        # print("-----------------> hist =", hist, "\n")
+        # print("-----------------> predict =", predict, "\n")
         pred_prob = -1
         pred_prob_var = -1
         if calc_prob:
@@ -71,7 +72,7 @@ class Smooth:
         return outputs
 
     def calc_pred_prob(self, x, predict, outputs, hist):
-        pred = predict[:, 0]
+        # pred = predict[:, 0]
         if self.noise_sd == 0:
             return 0
         histogram = hist
@@ -128,6 +129,7 @@ class Smooth:
                                    min=0,
                                    max=(self.num_classes - 1)) for m_predictions in batch_predictions]
         histogram = torch.cat(batch_hists, dim=0).view(-1, maxk, self.num_classes)
+        histogram = torch.div(histogram, float(m_hist))
         return histogram
 
     # def gaussian_sample(self, x):
