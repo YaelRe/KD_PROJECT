@@ -63,6 +63,7 @@ class KDFramework:
                 )
                 self.device = torch.device("cpu")
 
+        # TODO: delete?
         if teacher_model:
             self.teacher_model = teacher_model.to(self.device)
         else:
@@ -167,7 +168,7 @@ class KDFramework:
         :param save_model_pth (str): Path where you want to save the student model
         """
 
-        self.teacher_model.eval()
+        # self.teacher_model.eval()
         self.student_model.train()
         loss_arr = []
         length_of_dataset = len(self.train_loader.dataset)
@@ -184,13 +185,16 @@ class KDFramework:
             epoch_loss = 0.0
             correct = 0
 
+            # TODO: loader needs to match the smooth loader (run on same batches)
+            # TODO: add perturbation to data.....
             for (data, label) in self.train_loader:
 
                 data = data.to(self.device)
                 label = label.to(self.device)
 
                 student_out = self.student_model(data)
-
+                # TODO: use the function that use 'run_attack' and return all predictions
+                #  or read output (all tensors) from a file?
                 teacher_out = self.teacher_model(data)
 
                 loss = self.calculate_kd_loss(student_out, teacher_out, label)
