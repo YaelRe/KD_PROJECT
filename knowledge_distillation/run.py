@@ -10,7 +10,6 @@ import pandas as pd
 
 if __name__ == '__main__':
 
-
     # TODO check and get which loss function the KD need (cross entropy?)
     # TODO define temperature (float)
     # TODO define distil weight (float)
