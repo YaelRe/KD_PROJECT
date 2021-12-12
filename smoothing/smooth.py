@@ -51,7 +51,7 @@ class Smooth:
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         # print("-----------------> outputs =", outputs, "\n")
-        # print("-----------------> hist =", hist, "\n")
+        print("-----------------> hist =", hist, "\n")
         # print("-----------------> predict =", predict, "\n")
         pred_prob = -1
         pred_prob_var = -1
