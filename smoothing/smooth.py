@@ -3,13 +3,13 @@ import pandas as pd
 
 from sample_methods.clean import Clean
 from sample_methods.gaussian import Gaussian
+from run import batch_index
 
 normalize_Cifar10 = {'mean': torch.tensor([0.491, 0.482, 0.447]), 'std': torch.tensor([0.247, 0.243, 0.262])}
 normalize_Cifar10_no_var = {'mean': torch.tensor([0.491, 0.482, 0.447]), 'std': torch.tensor([1, 1, 1])}
 
 
 class Smooth:
-    batch_index = 1
     def __init__(self, base_model, noise_sd=0.0, m_forward=1, smooth="mcpredict", normalization='cifar10'):
         self.base_model = base_model
         num_classes = base_model.num_classes
@@ -47,14 +47,15 @@ class Smooth:
     # def __call__(self, x):
     #     return self.forward(x)
 
-    def predict(self, x, output, maxk, calc_prob=False):
+    def predict(self, x, output, maxk, calc_prob=False, mode=None):
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
-        df = pd.DataFrame(outputs)
-        df['batch_number'] = str(self.batch_index)
-        df.to_csv('test_output.csv', mode='a', index=False)
-        self.batch_index += 1
+        if mode is not None:
+            df = pd.DataFrame(outputs)
+            df['batch_number'] = str(batch_index)
+            output_file_name = mode + '_output.csv'
+            df.to_csv(output_file_name, mode='a', index=False)
 
         pred_prob = -1
         pred_prob_var = -1
