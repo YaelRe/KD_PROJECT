@@ -107,7 +107,6 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
            calc_prob=False, test_batch_idx=0):
-    # print("-----------------> IN run.py/attack()")
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -123,18 +122,15 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
 
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
-        # corr, _, _, _ = correct(model, data, output, target, topk=(1, 5))
-        corr, _, _, _ = correct(model, data, output, target, topk=(1, ))
+        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5))
         correct1 += corr[0]
-        # correct5 += corr[1]
+        correct5 += corr[1]
         tla = criterion(output_a, target).item()
         test_loss_a += tla  # sum up batch loss
-        # corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, 5),
-        #                                                 calc_prob=calc_prob)
-        corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, ),
-                                                                          calc_prob=calc_prob)
+        corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, 5),
+                                                        calc_prob=calc_prob)
         correct1_a += corr_a[0]
-        # correct5_a += corr_a[1]
+        correct5_a += corr_a[1]
         rad += rad_batch
         pred_prob += pred_prob_batch
         pred_prob_var += pred_prob_var_batch
@@ -158,36 +154,33 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     if writer is not None:
         writer.add_scalars('epoch/loss', {experiment_name + "_val": test_loss}, epoch)
         writer.add_scalars('epoch/top1', {experiment_name + "_val": correct1 / len(loader.dataset)}, epoch)
-        # writer.add_scalars('epoch/top5', {experiment_name + "_val": correct5 / len(loader.dataset)}, epoch)
+        writer.add_scalars('epoch/top5', {experiment_name + "_val": correct5 / len(loader.dataset)}, epoch)
         writer.add_scalars('epoch/loss', {experiment_name + "_val_adversarial": test_loss_a}, epoch)
         writer.add_scalars('epoch/top1', {experiment_name + "_val_adversarial": correct1_a / len(loader.dataset)},
                            epoch)
-        # writer.add_scalars('epoch/top5', {experiment_name + "_val_adversarial": correct5_a / len(loader.dataset)},
-        #                    epoch)
-    # logger.debug(
-    #     'Test set: Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
-    #     'Top5: {}/{} ({:.2f}%)'.format(test_loss, int(correct1), len(loader.dataset),
-    #                                    100. * correct1 / len(loader.dataset), int(correct5),
-    #                                    len(loader.dataset), 100. * correct5 / len(loader.dataset)))
-    # logger.debug(
-    #     'Adverserial set (eps={}): Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
-    #     'Top5: {}/{} ({:.2f}%)'.format(eps, test_loss_a, int(correct1_a), len(loader.dataset),
-    #                                    100. * correct1_a / len(loader.dataset), int(correct5_a),
-    #                                    len(loader.dataset), 100. * correct5_a / len(loader.dataset)))
-    #
-    # logger.debug(
-    #     'Adverserial set variance (eps={}): Certefication radius: {}, Prominent Class Probability: {}, '
-    #     'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
+        writer.add_scalars('epoch/top5', {experiment_name + "_val_adversarial": correct5_a / len(loader.dataset)},
+                           epoch)
+    logger.debug(
+        'Test set: Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
+        'Top5: {}/{} ({:.2f}%)'.format(test_loss, int(correct1), len(loader.dataset),
+                                       100. * correct1 / len(loader.dataset), int(correct5),
+                                       len(loader.dataset), 100. * correct5 / len(loader.dataset)))
+    logger.debug(
+        'Adverserial set (eps={}): Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
+        'Top5: {}/{} ({:.2f}%)'.format(eps, test_loss_a, int(correct1_a), len(loader.dataset),
+                                       100. * correct1_a / len(loader.dataset), int(correct5_a),
+                                       len(loader.dataset), 100. * correct5_a / len(loader.dataset)))
 
-    correct5 = 1
-    correct5_a = 1
+    logger.debug(
+        'Adverserial set variance (eps={}): Certefication radius: {}, Prominent Class Probability: {}, '
+        'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
+
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
            test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(loader.dataset), rad, pred_prob, pred_prob_var
 
 
 def targeted_attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, num_classes,
                     device, dtype, calc_prob=False):
-    # print("-----------------> IN run.py/targeted_attack()")
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -302,10 +295,9 @@ def test(model, loader, criterion, writer, iter, experiment_name, logger, epoch,
 
 def correct(model, data, output, target, topk=(1,), calc_prob=False):
     """Computes the correct@k for the specified values of k"""
-    # print("-----------------> IN run.py/correct()")
+
     # time_stamp_start = datetime.now()
     maxk = max(topk)
-    # print("-----------------> maxk =", maxk)
     pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob)
     radius = -1
     pred = pred.t().type_as(target)
