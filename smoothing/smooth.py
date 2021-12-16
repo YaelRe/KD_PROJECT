@@ -52,7 +52,7 @@ class Smooth:
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if mode is not None:
-            df = pd.DataFrame(outputs)
+            df = pd.DataFrame(outputs.cpu())
             df['batch_number'] = str(batch_index)
             output_file_name = mode + '_output.csv'
             df.to_csv(output_file_name, mode='a', index=False)
