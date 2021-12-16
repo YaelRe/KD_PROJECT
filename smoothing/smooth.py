@@ -52,7 +52,9 @@ class Smooth:
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if mode is not None:
-            df = pd.DataFrame(outputs.cpu())
+            stacked_outputs = torch.stack(outputs)
+            df = pd.DataFrame(
+                stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
             df['batch_number'] = str(batch_index)
             output_file_name = mode + '_output.csv'
             df.to_csv(output_file_name, mode='a', index=False)
