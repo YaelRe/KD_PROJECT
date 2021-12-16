@@ -117,6 +117,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     att.model = model  # TODO
 
     for batch_idx, (data, target) in enumerate(tqdm(loader)):
+        print(f'-----------> batch_idx = {batch_idx} ') #remove later
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
         x_a, output, output_a, _ = att.perturb(data, target, eps)
 

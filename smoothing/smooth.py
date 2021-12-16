@@ -1,4 +1,5 @@
 import torch
+import pandas as pd
 
 from sample_methods.clean import Clean
 from sample_methods.gaussian import Gaussian
@@ -8,6 +9,7 @@ normalize_Cifar10_no_var = {'mean': torch.tensor([0.491, 0.482, 0.447]), 'std': 
 
 
 class Smooth:
+    batch_index = 1
     def __init__(self, base_model, noise_sd=0.0, m_forward=1, smooth="mcpredict", normalization='cifar10'):
         self.base_model = base_model
         num_classes = base_model.num_classes
@@ -48,6 +50,11 @@ class Smooth:
     def predict(self, x, output, maxk, calc_prob=False):
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
+
+        df = pd.DataFrame(outputs)
+        df['batch_number'] = str(self.batch_index)
+        df.to_csv('test_output.csv', mode='a', index=False)
+        self.batch_index += 1
 
         pred_prob = -1
         pred_prob_var = -1
