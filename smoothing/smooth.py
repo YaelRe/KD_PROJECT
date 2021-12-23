@@ -52,8 +52,9 @@ class Smooth:
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if mode is not None:
-            # stacked_outputs = torch.stack(outputs)
-            # stacked_outputs = stacked_outputs.detach().cpu()
+            stacked_outputs = torch.stack(outputs)
+            stacked_outputs = stacked_outputs.detach().cpu()
+            print(f'stacked_outputs: {stacked_outputs}')
             # df = pd.DataFrame(
             #     stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
             # df['batch_number'] = str(batch_index)
