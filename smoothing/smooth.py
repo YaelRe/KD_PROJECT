@@ -52,13 +52,14 @@ class Smooth:
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if mode is not None:
-            stacked_outputs = torch.stack(outputs)
-            stacked_outputs = stacked_outputs.detach().cpu()
-            df = pd.DataFrame(
-                stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
-            df['batch_number'] = str(batch_index)
-            output_file_name = mode + '_output.csv'
-            df.to_csv(output_file_name, mode='a', index=False)
+            # stacked_outputs = torch.stack(outputs)
+            # stacked_outputs = stacked_outputs.detach().cpu()
+            # df = pd.DataFrame(
+            #     stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
+            # df['batch_number'] = str(batch_index)
+            # output_file_name = mode + '_output.csv'
+            # df.to_csv(output_file_name, mode='a', index=False)
+            print("mode is not none")
 
         pred_prob = -1
         pred_prob_var = -1
