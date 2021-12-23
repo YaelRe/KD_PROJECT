@@ -59,7 +59,7 @@ class Smooth:
             # df['batch_number'] = str(batch_index)
             # output_file_name = mode + '_output.csv'
             # df.to_csv(output_file_name, mode='a', index=False)
-            print("mode is not none")
+            print(f'mode is: {mode}')
 
         pred_prob = -1
         pred_prob_var = -1
