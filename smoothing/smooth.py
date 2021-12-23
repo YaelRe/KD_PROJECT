@@ -3,7 +3,6 @@ import pandas as pd
 
 from sample_methods.clean import Clean
 from sample_methods.gaussian import Gaussian
-from run import batch_index
 
 normalize_Cifar10 = {'mean': torch.tensor([0.491, 0.482, 0.447]), 'std': torch.tensor([0.247, 0.243, 0.262])}
 normalize_Cifar10_no_var = {'mean': torch.tensor([0.491, 0.482, 0.447]), 'std': torch.tensor([1, 1, 1])}
@@ -47,7 +46,7 @@ class Smooth:
     # def __call__(self, x):
     #     return self.forward(x)
 
-    def predict(self, x, output, maxk, calc_prob=False, mode=None):
+    def predict(self, x, output, maxk, calc_prob=False, mode=None, batch_idx=None):
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
@@ -56,7 +55,7 @@ class Smooth:
             stacked_outputs = stacked_outputs.detach().cpu()
             df = pd.DataFrame(
                 stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
-            df['batch_number'] = str(batch_index)
+            df['batch_number'] = batch_idx
             output_file_name = mode + '_output.csv'
             df.to_csv(output_file_name, mode='a', index=False)
 
