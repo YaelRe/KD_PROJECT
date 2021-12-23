@@ -52,7 +52,7 @@ class Smooth:
 
         if mode is not None:
             stacked_outputs = torch.stack(outputs)
-            stacked_outputs = stacked_outputs.detach().cpu()
+            stacked_outputs = stacked_outputs.detach().numpy()
             df = pd.DataFrame(
                 stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
             df['batch_number'] = batch_idx
