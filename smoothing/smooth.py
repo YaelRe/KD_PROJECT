@@ -59,9 +59,10 @@ class Smooth:
             df = pd.DataFrame(
                 stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
             print(f'df: \n{df}')
+            print(f'batch_index: {batch_index}')
             # df['batch_number'] = str(batch_index)
-            output_file_name = mode + '_output.csv'
-            df.to_csv(output_file_name, mode='a', index=False)
+            # output_file_name = mode + '_output.csv'
+            # df.to_csv(output_file_name, mode='a', index=False)
             print(f'mode is: {mode}')
 
         pred_prob = -1
