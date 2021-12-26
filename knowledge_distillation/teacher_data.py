@@ -4,17 +4,23 @@ import numpy as np
 
 
 class TeacherData:
-    def __init__(self):
+    def __init__(self, data_dic, m_forward=8):
         self.num_classes = 10
-        self.m_forward = 8
+        self.m_forward = m_forward
+        self.clean_outputs = None
+        self.perturb_outputs = None
 
+        self._read_teacher_outputs(data_dic)
 
-    def read_teacher_outputs(self, mode):
-        csv_file_name = mode + '_output.csv'
-        df = pd.read_csv(csv_file_name)
-        return df
+    def _read_teacher_outputs(self, data_dic):
+        if data_dic['clean_data'] is True:
+            csv_file_name = 'clean_data' + '_output.csv'
+            self.clean_outputs = pd.read_csv(csv_file_name)
+        if data_dic['perturb_data'] is True:
+            csv_file_name = 'perturb_data' + '_output.csv'
+            self.perturb_outputs = pd.read_csv(csv_file_name)
 
-    def get_teacher_output_by_batch_number(self, outputs_df, batch_index):
+    def _get_teacher_output_by_batch_number(self, outputs_df, batch_index):
         outputs_df = outputs_df.loc[outputs_df['batch_number'] == str(batch_index), outputs_df.columns != 'batch_number']
         outputs = outputs_df.to_numpy()
         outputs_to_tensor = torch.from_numpy(np.vstack(outputs).astype(np.float))
@@ -22,10 +28,8 @@ class TeacherData:
                                           int(outputs_to_tensor.shape[0]/self.m_forward),
                                           outputs_to_tensor.shape[1]]) # 8,256,10
 
-
-    def generate_prediction_smoothong_outputs(self, outputs):
+    def _generate_prediction_smoothing_outputs(self, outputs):
         maxk = 1  # remove it later..
-        num_classes = 10  # TODO: move it to class definition
         predictions = [output.topk(maxk, 1, True, True) for output in outputs]
         predictions = [pred.unsqueeze(dim=2) for _, pred in predictions]
         predictions_tensor = torch.cat(predictions, dim=2).view(-1, self.m_forward)
@@ -38,6 +42,14 @@ class TeacherData:
         histogram = torch.div(histogram, float(self.m_forward))
         return histogram
 
+    def get_predictions(self, mode: str, batch_index: int):
+        df = None
+        if mode == 'clean':
+            df = self.clean_outputs
+        if mode == 'perturb':
+            df = self.perturb_outputs
+        df_batch = self._get_teacher_output_by_batch_number(df, batch_index)
+        return self._generate_prediction_smoothing_outputs(df_batch)
 
 
 
