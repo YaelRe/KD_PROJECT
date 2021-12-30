@@ -46,16 +46,15 @@ class Smooth:
     # def __call__(self, x):
     #     return self.forward(x)
 
-    def predict(self, x, output, maxk, calc_prob=False, save_data_mode=None, batch_idx=None):
+    def predict(self, x, output, maxk, calc_prob=False, save_data_mode=None, batch_idx=None, image_indices=None):
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if save_data_mode is not None:
-            stacked_outputs = torch.stack(outputs)
-            stacked_outputs = stacked_outputs.detach().cpu().numpy()
-            df = pd.DataFrame(
-                stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
+            cpu_hist = hist.detach().cpu().numpy()
+            df = pd.DataFrame(cpu_hist)
             df['batch_number'] = batch_idx
+            df['image_indices'] = image_indices
             output_file_name = save_data_mode + '_output.csv'
             df.to_csv(output_file_name, mode='a', index=False)
 
@@ -125,11 +124,12 @@ class Smooth:
         return pred
 
     def generate_histogram(self, outputs, maxk, m_hist):
+        maxk = 1  ## the maxk for prediction smoothing (will be 10 in soft prediction smoothing)
         predictions = [output.topk(maxk, 1, True, True) for output in outputs]
         predictions = [pred.unsqueeze(dim=2) for _, pred in predictions]
         predictions_tensor = torch.cat(predictions, dim=2).view(-1, m_hist)
         batch_predictions = list(predictions_tensor.split(1, dim=0))
-        batch_hists = [torch.histc(m_predictions,
+        batch_hists = [torch.histc(m_predictions.float(),
                                    bins=self.num_classes,
                                    min=0,
                                    max=(self.num_classes - 1)) for m_predictions in batch_predictions]

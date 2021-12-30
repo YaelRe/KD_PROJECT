@@ -114,20 +114,20 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     rad, pred_prob, pred_prob_var = 0, 0, 0
     att.model = model  # TODO
 
-    for batch_idx, (data, target) in enumerate(tqdm(loader)):
+    for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         print(f'-----------> batch_idx = {batch_idx} ') #remove later
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
         x_a, output, output_a, _ = att.perturb(data, target, eps)
 
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
-        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), mode='clean_data', batch_idx=batch_idx)
+        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), mode='clean_data', batch_idx=batch_idx, image_indices=image_indices)
         correct1 += corr[0]
         correct5 += corr[1]
         tla = criterion(output_a, target).item()
         test_loss_a += tla  # sum up batch loss
         corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, 5),
-                                                        calc_prob=calc_prob, mode='perturb_data', batch_idx=batch_idx)
+                                                        calc_prob=calc_prob, mode='perturb_data', batch_idx=batch_idx, image_indices=image_indices)
         correct1_a += corr_a[0]
         correct5_a += corr_a[1]
         rad += rad_batch
@@ -292,12 +292,12 @@ def test(model, loader, criterion, writer, iter, experiment_name, logger, epoch,
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset)
 
 
-def correct(model, data, output, target, topk=(1,), calc_prob=False, mode=None, batch_idx=None):
+def correct(model, data, output, target, topk=(1,), calc_prob=False, mode=None, batch_idx=None, image_indices=None):
     """Computes the correct@k for the specified values of k"""
 
     # time_stamp_start = datetime.now()
     maxk = max(topk)
-    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, save_data_mode=mode, batch_idx=batch_idx)
+    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, save_data_mode=mode, batch_idx=batch_idx, image_indices=image_indices)
     radius = -1
     pred = pred.t().type_as(target)
     correct = pred.eq(target.view(1, -1).expand_as(pred))
