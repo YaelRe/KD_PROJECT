@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+from datetime import date
 
 from sample_methods.clean import Clean
 from sample_methods.gaussian import Gaussian
@@ -55,7 +56,8 @@ class Smooth:
             df = pd.DataFrame(cpu_hist)
             df['batch_number'] = batch_idx
             df['image_indices'] = image_indices
-            output_file_name = save_data_mode + '_output.csv'
+            current_date = date.today().strftime("%b-%d-%Y")
+            output_file_name = save_data_mode + '_output' + current_date + '.csv'
             df.to_csv(output_file_name, mode='a', index=False)
 
         pred_prob = -1
