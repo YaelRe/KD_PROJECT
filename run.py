@@ -297,7 +297,7 @@ def correct(model, data, output, target, topk=(1,), calc_prob=False, mode=None, 
 
     # time_stamp_start = datetime.now()
     maxk = max(topk)
-    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, mode=mode, batch_idx=batch_idx)
+    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, save_data_mode=mode, batch_idx=batch_idx)
     radius = -1
     pred = pred.t().type_as(target)
     correct = pred.eq(target.view(1, -1).expand_as(pred))
