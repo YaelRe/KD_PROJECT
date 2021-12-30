@@ -46,17 +46,17 @@ class Smooth:
     # def __call__(self, x):
     #     return self.forward(x)
 
-    def predict(self, x, output, maxk, calc_prob=False, mode=None, batch_idx=None):
+    def predict(self, x, output, maxk, calc_prob=False, save_data_mode=None, batch_idx=None):
         _, pred = output.topk(maxk, 1, True, True)
         outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
 
-        if mode is not None:
+        if save_data_mode is not None:
             stacked_outputs = torch.stack(outputs)
             stacked_outputs = stacked_outputs.detach().cpu().numpy()
             df = pd.DataFrame(
                 stacked_outputs.reshape([stacked_outputs.shape[0] * stacked_outputs.shape[1], stacked_outputs.shape[2]]))
             df['batch_number'] = batch_idx
-            output_file_name = mode + '_output.csv'
+            output_file_name = save_data_mode + '_output.csv'
             df.to_csv(output_file_name, mode='a', index=False)
 
         pred_prob = -1
