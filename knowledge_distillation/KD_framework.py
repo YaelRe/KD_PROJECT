@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 from copy import deepcopy
@@ -26,6 +27,7 @@ class KDFramework:
 
     def __init__(
         self,
+        teacher_data,
         teacher_model,
         student_model,
         train_loader,
@@ -40,6 +42,7 @@ class KDFramework:
         logdir="./Experiments",
     ):
 
+        self.teacher_data = teacher_data
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.optimizer_teacher = optimizer_teacher
@@ -185,17 +188,16 @@ class KDFramework:
             epoch_loss = 0.0
             correct = 0
 
-            # TODO: loader needs to match the smooth loader (run on same batches)
             # TODO: add perturbation to data.....
-            for (data, label) in self.train_loader:
+            for batch_index, (data, label, image_indices) in enumerate(tqdm(self.train_loader)):
 
                 data = data.to(self.device)
                 label = label.to(self.device)
 
                 student_out = self.student_model(data)
-                # TODO: use the function that use 'run_attack' and return all predictions
-                #  or read output (all tensors) from a file?
-                teacher_out = self.teacher_model(data)
+                # TODO: understand what to do about clean vs perturb data
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean', image_indices=image_indices)
+                # teacher_out = self.teacher_model(data)
 
                 loss = self.calculate_kd_loss(student_out, teacher_out, label)
 
