@@ -20,35 +20,26 @@ class TeacherData:
             csv_file_name = 'perturb_data' + '_output.csv'
             self.perturb_outputs = pd.read_csv(csv_file_name)
 
-    def _get_teacher_output_by_batch_number(self, outputs_df, batch_index):
-        outputs_df = outputs_df.loc[outputs_df['batch_number'] == str(batch_index), outputs_df.columns != 'batch_number']
-        outputs = outputs_df.to_numpy()
+    def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices : list):
+        # outputs_df["image_indices"] = pd.to_numeric(outputs_df["image_indices"]) #move it later
+        batch_histogram_outputs = outputs_df.loc[outputs_df['image_indices'].isin(image_indices)]
+        batch_histogram_outputs = batch_histogram_outputs.drop(['image_indices', 'batch_number'], axis=1)
+
+        outputs = batch_histogram_outputs.to_numpy()
         outputs_to_tensor = torch.from_numpy(np.vstack(outputs).astype(np.float))
-        return outputs_to_tensor.reshape([self.m_forward,
-                                          int(outputs_to_tensor.shape[0]/self.m_forward),
-                                          outputs_to_tensor.shape[1]]) # 8,256,10
+        return outputs_to_tensor
 
     def _generate_prediction_smoothing_outputs(self, outputs):
-        maxk = 1  # remove it later..
-        predictions = [output.topk(maxk, 1, True, True) for output in outputs]
-        predictions = [pred.unsqueeze(dim=2) for _, pred in predictions]
-        predictions_tensor = torch.cat(predictions, dim=2).view(-1, self.m_forward)
-        batch_predictions = list(predictions_tensor.split(1, dim=0))
-        batch_hists = [torch.histc(m_predictions.float(),
-                                   bins=self.num_classes,
-                                   min=0,
-                                   max=(self.num_classes - 1)) for m_predictions in batch_predictions]
-        histogram = torch.cat(batch_hists, dim=0).view(-1, maxk, self.num_classes)
-        histogram = torch.div(histogram, float(self.m_forward))
+        histogram = torch.div(outputs, float(self.m_forward))
         return histogram
 
-    def get_predictions(self, mode: str, batch_index: int):
+    def get_predictions_by_image_indices(self, mode: str, image_indices: list):
         df = None
         if mode == 'clean':
             df = self.clean_outputs
         if mode == 'perturb':
             df = self.perturb_outputs
-        df_batch = self._get_teacher_output_by_batch_number(df, batch_index)
+        df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
         return self._generate_prediction_smoothing_outputs(df_batch)
 
 

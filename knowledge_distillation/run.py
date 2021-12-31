@@ -19,6 +19,7 @@ def main():
 
     student_model = wideresnet28()
     workers = 4
+    # TODO: make sure it's the new loaders with indices
     train_loader, test_loader = get_loaders(dataset=torchvision.datasets.CIFAR10, data="./data", batch_size=256,
                                             val_batch_size=256, workers=workers)
 
@@ -79,8 +80,9 @@ if __name__ == '__main__':
 
     torch.set_printoptions(threshold=10_000)
     teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=8)
-    temp_batch_index = 0
-    batch_teacher_out = teacher_data.get_predictions(mode='clean', batch_index=temp_batch_index)
+
+    temp_image_indices = [str(index) for index in range(255)]
+    batch_teacher_out = teacher_data.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
 
     print(batch_teacher_out)
 
