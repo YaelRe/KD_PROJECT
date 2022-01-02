@@ -54,8 +54,8 @@ if __name__ == '__main__':
     main()
 
     # torch.set_printoptions(threshold=10_000)
-    # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=8)
-    # temp_image_indices = [str(index) for index in range(255)]
+    # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
+    # temp_image_indices = list(range(255))
     # batch_teacher_out = teacher_data1.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
     # print(batch_teacher_out)
 
