@@ -26,18 +26,18 @@ class KDFramework:
     """
 
     def __init__(
-        self,
-        teacher_data,
-        student_model,
-        train_loader,
-        val_loader,
-        optimizer_student,
-        loss_fn=nn.KLDivLoss(),
-        temp=20.0,
-        distil_weight=0.5,
-        device="cpu",
-        log=False,
-        logdir="./Experiments",
+            self,
+            teacher_data,
+            student_model,
+            train_loader,
+            val_loader,
+            optimizer_student,
+            loss_fn=nn.KLDivLoss(),
+            temp=20.0,
+            distil_weight=0.5,
+            device="cpu",
+            log=False,
+            logdir="./Experiments",
     ):
 
         self.teacher_data = teacher_data
@@ -73,13 +73,12 @@ class KDFramework:
         self.loss_fn = loss_fn.to(self.device)
         self.ce_fn = nn.CrossEntropyLoss().to(self.device)
 
-
     def _train_student(
-        self,
-        epochs=10,
-        plot_losses=True,
-        save_model=True,
-        save_model_pth="./models/student.pt",
+            self,
+            epochs=10,
+            plot_losses=True,
+            save_model=True,
+            save_model_pth="./models/student.pt",
     ):
         """
         Function to train student model - for internal use only.
@@ -92,7 +91,7 @@ class KDFramework:
         # self.teacher_model.eval()
         self.student_model.train()
         loss_arr = []
-        length_of_dataset = len(self.train_loader.dataset) # TODO: make sure that 50000 is ok..
+        length_of_dataset = len(self.train_loader.dataset)  # TODO: make sure that 50000 is ok..
         best_acc = 0.0
         self.best_student_model_weights = deepcopy(self.student_model.state_dict())
 
@@ -114,7 +113,8 @@ class KDFramework:
 
                 student_out = self.student_model(data)
                 # TODO: understand what to do about clean vs perturb data
-                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean', image_indices=image_indices)
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean',
+                                                                                 image_indices=image_indices)
                 # teacher_out = self.teacher_model(data)
 
                 loss = self.calculate_kd_loss(student_out, teacher_out, label)
@@ -144,9 +144,7 @@ class KDFramework:
             if self.log:
                 self.writer.add_scalar("Training loss/Student", epoch_loss, epochs)
                 self.writer.add_scalar("Training accuracy/Student", epoch_acc, epochs)
-                self.writer.add_scalar(
-                    "Validation accuracy/Student", epoch_val_acc, epochs
-                )
+                self.writer.add_scalar("Validation accuracy/Student", epoch_val_acc, epochs)
 
             loss_arr.append(epoch_loss)
             print(
@@ -162,11 +160,11 @@ class KDFramework:
             plt.plot(loss_arr)
 
     def train_student(
-        self,
-        epochs=10,
-        plot_losses=True,
-        save_model=True,
-        save_model_pth="./models/student.pt",
+            self,
+            epochs=10,
+            plot_losses=True,
+            save_model=True,
+            save_model_pth="./models/student.pt",
     ):
         """
         Function that will be training the student

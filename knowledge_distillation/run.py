@@ -10,10 +10,14 @@ import knowledge_distillation.teacher_data as td
 
 def main():
     student_model = wideresnet28()
-    teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
+    teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False},
+                                  m_forward=512)
     workers = 4
-    train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10, data="./data", batch_size=256,
-                                            val_batch_size=256, workers=workers)
+    train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
+                                               data="./data",
+                                               batch_size=256,
+                                               val_batch_size=256,
+                                               workers=workers)
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
