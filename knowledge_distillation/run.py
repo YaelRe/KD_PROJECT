@@ -7,83 +7,56 @@ from util.cross_entropy import CrossEntropyLoss
 import pandas as pd
 import knowledge_distillation.teacher_data as td
 
-# TODO: import teacher model
 
 def main():
-    # TODO check and get which loss function the KD need (cross entropy?)
-    # TODO define temperature (float)
-    # TODO define distil weight (float)
-    # TODO define device
-    # TODO define log (true)
-    # TODO define logdir
-
     student_model = wideresnet28()
+    teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
     workers = 4
-    # TODO: make sure it's the new loaders with indices
-    train_loader, test_loader = get_loaders(dataset=torchvision.datasets.CIFAR10, data="./data", batch_size=256,
+    train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10, data="./data", batch_size=256,
                                             val_batch_size=256, workers=workers)
 
     # TODO: extract it?
-    args = pd.DataFrame({"momentum": 0.9, "learning_rate": 0.1, "nesterov_momentum": True, "decay": 0.001,
-                         "temperature": 5, "distil_weight": 0.5, "device": 'cuda',
-                         "log_dir": 'C:/Users/Yael/DL/KD_PROJECT/logs'})
-
-    # TODO make sure that this sgd optimizer is good
-    # TODO complete teacher optimizer
-    optimizer_teacher = torch.optim.SGD(
-        student_model.parameters(),
-        lr=args.learning_rate,
-        momentum=args.momentum,
-        weight_decay=args.decay,
-        nesterov=args.nesterov_momentum)
+    args = pd.DataFrame({'momentum': 0.9,
+                         'learning_rate': 0.1,
+                         'nesterov_momentum': True,
+                         'decay': 0.001,
+                         'temperature': 5,
+                         'distil_weight': 0.5,
+                         'device': 'cpu',
+                         'log_dir': 'C:/Users/Yael/DL/KD_PROJECT/logs'}, index=[0])
 
     optimizer_student = torch.optim.SGD(
         student_model.parameters(),
-        args.learning_rate,
-        momentum=args.momentum,
-        weight_decay=args.decay,
-        nesterov=args.nesterov_momentum)
+        args.learning_rate[0],
+        momentum=args.momentum[0],
+        weight_decay=args.decay[0],
+        nesterov=args.nesterov_momentum[0])
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
-        teacher_model=student_model,
+        teacher_data=teacher_data,
         student_model=student_model,
         train_loader=train_loader,
         val_loader=test_loader,
-        optimizer_teacher=optimizer_teacher,
         optimizer_student=optimizer_student,
         loss_fn=CrossEntropyLoss(),
-        temp=args.temperature,
-        distil_weight=args.distil_weight,
-        device=args.device,
+        temp=args.temperature[0],
+        distil_weight=args.distil_weight[0],
+        device=args.device[0],
         log=True,
-        logdir=args.log_dir
+        logdir=args.log_dir[0]
     )
 
-    # SoftTargetKD.train_student
+    soft_target_KD.train_student()
 
-    # test student model
-
-    # ======================
-
-    # adversarial training............
-
-
-
-# def teacher_data_loader(df):
-#     for batch_index in range(10):
-#         batch_tensors = df.loc[df['batch_number'] == batch_index]
-#         # ........
 
 if __name__ == '__main__':
-    # main()
+    main()
 
-    torch.set_printoptions(threshold=10_000)
-    teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=8)
-
-    temp_image_indices = [str(index) for index in range(255)]
-    batch_teacher_out = teacher_data.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
-
-    print(batch_teacher_out)
+    # torch.set_printoptions(threshold=10_000)
+    # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=8)
+    # temp_image_indices = [str(index) for index in range(255)]
+    # batch_teacher_out = teacher_data1.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
+    # print(batch_teacher_out)
 
 

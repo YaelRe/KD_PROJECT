@@ -24,11 +24,10 @@ class SoftTargetKD(KDFramework):
 
     def __init__(
         self,
-        teacher_model,
+        teacher_data,
         student_model,
         train_loader,
         val_loader,
-        optimizer_teacher,
         optimizer_student,
         loss_fn=nn.MSELoss(),
         temp=20.0,
@@ -38,11 +37,10 @@ class SoftTargetKD(KDFramework):
         logdir="./Experiments",
     ):
         super(SoftTargetKD, self).__init__(
-            teacher_model,
+            teacher_data,
             student_model,
             train_loader,
             val_loader,
-            optimizer_teacher,
             optimizer_student,
             loss_fn,
             temp,
