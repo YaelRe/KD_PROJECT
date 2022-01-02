@@ -20,7 +20,8 @@ class TeacherData:
             csv_file_name = 'perturb_data' + '_output.csv'
             self.perturb_outputs = pd.read_csv(csv_file_name)
 
-    def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices : list):
+    # image indices must be string
+    def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices: list):
         # outputs_df["image_indices"] = pd.to_numeric(outputs_df["image_indices"]) #move it later
         batch_histogram_outputs = outputs_df.loc[outputs_df['image_indices'].isin(image_indices)]
         batch_histogram_outputs = batch_histogram_outputs.drop(['image_indices', 'batch_number'], axis=1)
