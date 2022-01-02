@@ -15,14 +15,19 @@ class TeacherData:
     def _read_teacher_outputs(self, data_dic):
         if data_dic['clean_data'] is True:
             csv_file_name = 'clean_data' + '_output.csv'
-            self.clean_outputs = pd.read_csv(csv_file_name)
+            clean_df = pd.read_csv(csv_file_name)
+            clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
+            clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
+            self.clean_outputs = clean_df
+
         if data_dic['perturb_data'] is True:
             csv_file_name = 'perturb_data' + '_output.csv'
-            self.perturb_outputs = pd.read_csv(csv_file_name)
+            perturb_df = pd.read_csv(csv_file_name)
+            perturb_df = perturb_df.drop(perturb_df[perturb_df.image_indices == 'image_indices'].index)
+            perturb_df["image_indices"] = pd.to_numeric(perturb_df["image_indices"])
+            self.perturb_outputs = perturb_df
 
-    # image indices must be string
     def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices: list):
-        # outputs_df["image_indices"] = pd.to_numeric(outputs_df["image_indices"]) #move it later
         batch_histogram_outputs = outputs_df.loc[outputs_df['image_indices'].isin(image_indices)]
         batch_histogram_outputs = batch_histogram_outputs.drop(['image_indices', 'batch_number'], axis=1)
 
