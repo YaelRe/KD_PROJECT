@@ -1,0 +1,14 @@
+Random Seed:  42
+args
+Namespace(act_noise_a=False, act_noise_b=False, adv=False, adv_w=0.5, alpha=0.006, arch='wideresnet', att_k_list=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10], att_names=['pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd', 'pgd'], att_targeted_list=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], attack=<class 'attacks.pgd.PGD'>, attack_k=10, attack_name='pgd', attacks=[<class 'attacks.pgd.PGD'>], attacks_add_params=[{'n_iter': 10, 'alpha': 0.006}], attacks_alpha=[0.006], attacks_eps=[0.03137254901960784], attacks_k=[10], attacks_tar=[False], attacks_type=['pgd'], batch_size=256, beta=1.0, clip_grad=0.0, cpni=True, data='./data', data_parallel=False, dataset=<class 'torchvision.datasets.cifar.CIFAR10'>, dataset_name='cifar10', decay=0.0001, device='cuda:0', dtype=torch.float32, epochs=400, eps=0.03137254901960784, evaluate=False, experiment_name='Wide4CNIAdvTrainPGDK10AttackPGDK10', gamma=0.1, gen_adv=False, get_loaders=<function get_loaders at 0x7f07a78aa280>, gpus=[0], la_alpha=0.5, la_k=6, layers=28, learning_rate=0.1, log_interval=100, lookahead=False, m_backward=8, m_forward=512, m_forward_list=[1, 2, 4, 8, 16, 32, 64, 128, 256, 512], mcepredict=False, mcpredict=True, momentum=0.9, multi_att=False, nesterov_momentum=True, net=<function wideresnet28 at 0x7f07a98b7310>, net_name='wideresnet28', no_norm=False, no_pred_prob=False, no_var_norm=False, noise_decay=0, noise_list=[0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.41, 0.42, 0.43, 0.44, 0.45, 0.46, 0.47, 0.48, 0.49, 0.5], noise_rank=5, noise_sd=0, num_classes=10, opt='sgd', pni=False, print_model=False, results_dir='./results', resume='/home/adinak/KD_PROJECT/trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar', run_optimal=False, save='results_w_global_csv_time_2022-01-02_18-30-51', save_path='./results/results_w_global_csv_time_2022-01-02_18-30-51', schedule=[100, 200, 300, 400], seed=42, smooth='mcpredict', smoothing=True, start_epoch=0, step_size=0.007, targeted=False, test_hyper_params=False, test_noise=False, test_on_attack=False, type='float32', val_batch_size=256, weight_noise=True, weight_noise_d=0.25, weight_noise_f=0.1, width=4.0, workers=4, zero_start=False)
+Number of parameters 42766234
+Files already downloaded and verified
+Files already downloaded and verified
+accuracy1
+0.98624
+accuracy1_a_list
+[0.9883]
+accuracy5
+0.99964
+accuracy5_a_list
+[0.99966]
