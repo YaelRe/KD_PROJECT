@@ -28,7 +28,7 @@ def main():
                          'decay': 0.001,
                          'temperature': 5,
                          'distil_weight': 0.5,
-                         'device': 'cpu',
+                         'device': 'cuda',
                          'log_dir': '/logs'}, index=[0])
 
     optimizer_student = torch.optim.SGD(
