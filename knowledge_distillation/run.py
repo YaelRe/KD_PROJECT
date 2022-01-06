@@ -29,7 +29,7 @@ def main():
                          'temperature': 5,
                          'distil_weight': 0.5,
                          'device': 'cuda',
-                         'log_dir': '/logs'}, index=[0])
+                         'log_dir': 'knowledge_distillation/logs/'}, index=[0])
 
     optimizer_student = torch.optim.SGD(
         student_model.parameters(),
