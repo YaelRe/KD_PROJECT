@@ -53,7 +53,7 @@ def main():
         logdir=args.log_dir[0]
     )
 
-    soft_target_KD.train_student(epochs=1)
+    soft_target_KD.train_student(epochs=10)
     soft_target_KD.evaluate()
 
 
