@@ -26,7 +26,7 @@ def main():
                          'learning_rate': 0.01,
                          'nesterov_momentum': True,
                          'decay': 0.001,
-                         'temperature': 1,
+                         'temperature': 2.5,
                          'distil_weight': 0.5,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/'}, index=[0])
