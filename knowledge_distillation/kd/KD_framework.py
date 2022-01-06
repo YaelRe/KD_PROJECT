@@ -133,6 +133,11 @@ class KDFramework:
                 self.optimizer_student.step()
 
                 epoch_loss += loss.item()
+                print(
+                    "Batch: {}, Loss: {}, Correct: {}".format(
+                        batch_index + 1, epoch_loss, correct
+                    )
+                )
 
             epoch_acc = correct / length_of_dataset
 
