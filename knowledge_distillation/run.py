@@ -54,6 +54,7 @@ def main():
     )
 
     soft_target_KD.train_student()
+    soft_target_KD.evaluate()
 
 
 if __name__ == '__main__':
