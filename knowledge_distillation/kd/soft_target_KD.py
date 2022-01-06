@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-from knowledge_distillation.KD_framework import KDFramework
+from knowledge_distillation.kd.KD_framework import KDFramework
 
 
 class SoftTargetKD(KDFramework):

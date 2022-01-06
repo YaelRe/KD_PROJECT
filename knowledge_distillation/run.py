@@ -6,8 +6,8 @@ from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
 
-from knowledge_distillation.soft_target_KD import SoftTargetKD
-import knowledge_distillation.teacher_data as td
+from kd.soft_target_KD import SoftTargetKD
+import kd.teacher_data as td
 
 
 def main():
