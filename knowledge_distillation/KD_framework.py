@@ -114,7 +114,7 @@ class KDFramework:
                 student_out = self.student_model(data)
                 # TODO: understand what to do about clean vs perturb data
                 teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean',
-                                                                                 image_indices=image_indices)
+                                                                                 image_indices=image_indices.tolist())
                 # teacher_out = self.teacher_model(data)
 
                 loss = self.calculate_kd_loss(student_out, teacher_out, label)
