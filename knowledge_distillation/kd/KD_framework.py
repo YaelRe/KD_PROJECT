@@ -201,7 +201,7 @@ class KDFramework:
         outputs = []
 
         with torch.no_grad():
-            for data, target in self.val_loader:
+            for data, target, _ in self.val_loader:
                 data = data.to(self.device)
                 target = target.to(self.device)
                 output = model(data)
