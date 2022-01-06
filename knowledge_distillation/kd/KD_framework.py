@@ -81,7 +81,7 @@ class KDFramework:
             epochs=10,
             plot_losses=True,
             save_model=True,
-            save_model_pth="./models/student.pt",
+            save_model_pth="knowledge_distillation/kd_models/student.pt",
     ):
         """
         Function to train student model - for internal use only.
