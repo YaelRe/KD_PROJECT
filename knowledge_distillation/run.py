@@ -1,10 +1,12 @@
 import torchvision
 import torch
-from .soft_target_KD import SoftTargetKD
+import pandas as pd
+
 from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
-import pandas as pd
+
+from knowledge_distillation.soft_target_KD import SoftTargetKD
 import knowledge_distillation.teacher_data as td
 
 
