@@ -23,7 +23,7 @@ def main():
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.1,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
                          'decay': 0.001,
                          'temperature': 2,
