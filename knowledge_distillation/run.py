@@ -6,7 +6,7 @@ from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
 
-from kd.soft_target_KD import SoftTargetKD
+from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import kd.teacher_data as td
 
 
@@ -53,7 +53,7 @@ def main():
         logdir=args.log_dir[0]
     )
 
-    soft_target_KD.train_student()
+    soft_target_KD.train_student(epochs=1)
     soft_target_KD.evaluate()
 
 
