@@ -53,9 +53,12 @@ class KDFramework:
             self.writer = SummaryWriter(logdir)
 
         if device == "cpu":
+            print('device == cpu')
             self.device = torch.device("cpu")
         elif device == "cuda":
+            print('device == cuda')
             if torch.cuda.is_available():
+                print('cuda is available')
                 self.device = torch.device("cuda")
             else:
                 print(
