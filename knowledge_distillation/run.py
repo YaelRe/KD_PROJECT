@@ -23,10 +23,10 @@ def main():
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.01,
+                         'learning_rate': 0.1,
                          'nesterov_momentum': True,
                          'decay': 0.001,
-                         'temperature': 2.5,
+                         'temperature': 2,
                          'distil_weight': 0.5,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/'}, index=[0])
@@ -45,7 +45,7 @@ def main():
         train_loader=train_loader,
         val_loader=test_loader,
         optimizer_student=optimizer_student,
-        loss_fn=CrossEntropyLoss(),
+        loss_fn=torch.nn.MSELoss(),
         temp=args.temperature[0],
         distil_weight=args.distil_weight[0],
         device=args.device[0],
