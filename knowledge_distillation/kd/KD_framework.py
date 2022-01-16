@@ -67,8 +67,8 @@ class KDFramework:
                 self.device = torch.device("cpu")
 
         if teacher_data:
+            print('temp = {}, distil_weight = {}'.format(self.temp, self.distil_weight))
             # self.teacher_model = teacher_model.to(self.device)
-            pass
         else:
             print("Warning!!! Teacher is NONE.")
 

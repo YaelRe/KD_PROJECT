@@ -25,11 +25,11 @@ def main():
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.01,
+                         'learning_rate': 0.001,
                          'nesterov_momentum': True,
                          'decay': 0.001,
                          'temperature': 2,
-                         'distil_weight': 0.5,
+                         'distil_weight': 0.3,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/'}, index=[0])
 
@@ -65,7 +65,6 @@ if __name__ == '__main__':
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
-    # print("hi")
 
 
     # torch.set_printoptions(threshold=10_000)
