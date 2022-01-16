@@ -39,6 +39,7 @@ def main():
         momentum=args.momentum[0],
         weight_decay=args.decay[0],
         nesterov=args.nesterov_momentum[0])
+    print(f'lr = {args.learning_rate[0]}')
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
@@ -54,10 +55,10 @@ def main():
         log=True,
         logdir=args.log_dir[0]
     )
-    # soft_target_KD.evaluate_teacher()
 
-    soft_target_KD.train_student()
+    soft_target_KD.train_student(epochs=15)
     soft_target_KD.evaluate()
+    soft_target_KD.evaluate_teacher()
 
 
 if __name__ == '__main__':
