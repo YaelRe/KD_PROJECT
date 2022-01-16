@@ -214,7 +214,7 @@ class KDFramework:
 
                 teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
                                                                                  image_indices=image_indices.tolist())
-                teacher_out = teacher_out.to(self.device)
+                teacher_output = teacher_output.to(self.device)
                 if isinstance(student_output, tuple):
                     student_output = student_output[0]
                 outputs.append(student_output)
@@ -261,7 +261,7 @@ class KDFramework:
                 target = target.to(self.device)
                 output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
                                                                                  image_indices=image_indices.tolist())
-                teacher_out = teacher_out.to(self.device)
+                output = output.to(self.device)
                 # output = model(data)
 
                 if isinstance(output, tuple):
