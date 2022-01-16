@@ -16,28 +16,28 @@ class TeacherData:
 
     def _read_teacher_outputs(self, data_dic):
         if data_dic['clean_train_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
+            csv_file_name = './teacher_data/clean_train_data_output.csv'
             clean_df = pd.read_csv(csv_file_name)
             clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
             clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
             self.clean_train_outputs = clean_df
 
         if data_dic['perturb_train_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/perturb_train_data_output.csv'
+            csv_file_name = './teacher_data/perturb_train_data_output.csv'
             perturb_df = pd.read_csv(csv_file_name)
             perturb_df = perturb_df.drop(perturb_df[perturb_df.image_indices == 'image_indices'].index)
             perturb_df["image_indices"] = pd.to_numeric(perturb_df["image_indices"])
             self.perturb_train_outputs = perturb_df
 
         if data_dic['clean_test_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
+            csv_file_name = './teacher_data/clean_test_data_output.csv'
             clean_df = pd.read_csv(csv_file_name)
             clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
             clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
             self.clean_test_outputs = clean_df
 
         if data_dic['perturb_test_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/perturb_test_data_output.csv'
+            csv_file_name = './teacher_data/perturb_test_data_output.csv'
             perturb_df = pd.read_csv(csv_file_name)
             perturb_df = perturb_df.drop(perturb_df[perturb_df.image_indices == 'image_indices'].index)
             perturb_df["image_indices"] = pd.to_numeric(perturb_df["image_indices"])

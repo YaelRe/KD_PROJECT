@@ -13,7 +13,7 @@ import knowledge_distillation.kd.teacher_data as td
 
 def main():
     student_model = wideresnet28()
-    teacher_data = td.TeacherData(data_dic={'clean_train_data': False, 'clean_test_data': True,
+    teacher_data = td.TeacherData(data_dic={'clean_train_data': True, 'clean_test_data': True,
                                             'perturb_train_data': False, 'perturb_test_data': False},
                                   m_forward=512)
     workers = 4
@@ -54,10 +54,10 @@ def main():
         log=True,
         logdir=args.log_dir[0]
     )
-    soft_target_KD.evaluate_teacher()
+    # soft_target_KD.evaluate_teacher()
 
-    # soft_target_KD.train_student()
-    # soft_target_KD.evaluate()
+    soft_target_KD.train_student()
+    soft_target_KD.evaluate()
 
 
 if __name__ == '__main__':

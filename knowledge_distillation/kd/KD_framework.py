@@ -203,26 +203,35 @@ class KDFramework:
         model.eval()
         length_of_dataset = len(self.val_loader.dataset)
         correct = 0
+        student_teacher_correct = 0
         outputs = []
 
         with torch.no_grad():
-            for data, target, _ in self.val_loader:
+            for data, target, image_indices in self.val_loader:
                 data = data.to(self.device)
                 target = target.to(self.device)
-                output = model(data)
+                student_output = model(data)
 
-                if isinstance(output, tuple):
-                    output = output[0]
-                outputs.append(output)
+                teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
+                                                                                 image_indices=image_indices.tolist())
+                teacher_out = teacher_out.to(self.device)
+                if isinstance(student_output, tuple):
+                    student_output = student_output[0]
+                outputs.append(student_output)
 
-                pred = output.argmax(dim=1, keepdim=True)
-                correct += pred.eq(target.view_as(pred)).sum().item()
+                student_pred = student_output.argmax(dim=1, keepdim=True)
+                correct += student_pred.eq(target.view_as(student_pred)).sum().item()
+
+                teacher_pred = teacher_output.argmax(dim=1, keepdim=True)
+                student_teacher_correct += student_pred.eq(teacher_pred.view_as(student_pred)).sum().item()
 
         accuracy = correct / length_of_dataset
+        student_teacher_accuracy = student_teacher_correct / length_of_dataset
 
         if verbose:
             print("-" * 80)
             print("Validation Accuracy: {}".format(accuracy))
+            print("Student Teacher Validation Accuracy: {}".format(student_teacher_accuracy))
         return outputs, accuracy
 
     def evaluate(self):
@@ -252,6 +261,7 @@ class KDFramework:
                 target = target.to(self.device)
                 output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
                                                                                  image_indices=image_indices.tolist())
+                teacher_out = teacher_out.to(self.device)
                 # output = model(data)
 
                 if isinstance(output, tuple):
@@ -266,6 +276,7 @@ class KDFramework:
         if verbose:
             print("-" * 80)
             print("Teacher Validation Accuracy: {}".format(accuracy))
+            # Teacher Validation Accuracy: 0.8868
         return outputs, accuracy
 
     def get_parameters(self):
