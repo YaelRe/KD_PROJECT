@@ -116,7 +116,7 @@ class KDFramework:
 
                 student_out = self.student_model(data)
                 # TODO: understand what to do about clean vs perturb data
-                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean',
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
@@ -235,6 +235,38 @@ class KDFramework:
         _, accuracy = self._evaluate_model(model)
 
         return accuracy
+
+    def evaluate_teacher(self, verbose=True):
+        """
+        Evaluate the given model's accuaracy over val set.
+        For internal use only.
+        :param model (nn.Module): Model to be used for evaluation
+        :param verbose (bool): Display Accuracy
+        """
+        length_of_dataset = len(self.val_loader.dataset)
+        correct = 0
+        outputs = []
+
+        with torch.no_grad():
+            for _, target, image_indices in self.val_loader:
+                target = target.to(self.device)
+                output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
+                                                                                 image_indices=image_indices.tolist())
+                # output = model(data)
+
+                if isinstance(output, tuple):
+                    output = output[0]
+                outputs.append(output)
+
+                pred = output.argmax(dim=1, keepdim=True)
+                correct += pred.eq(target.view_as(pred)).sum().item()
+
+        accuracy = correct / length_of_dataset
+
+        if verbose:
+            print("-" * 80)
+            print("Teacher Validation Accuracy: {}".format(accuracy))
+        return outputs, accuracy
 
     def get_parameters(self):
         """

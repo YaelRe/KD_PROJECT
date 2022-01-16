@@ -1,18 +1,20 @@
 import torchvision
 import torch
 import pandas as pd
+import random
 
 from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
 
-from kd.soft_target_KD import SoftTargetKD
-import kd.teacher_data as td
+from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
+import knowledge_distillation.kd.teacher_data as td
 
 
 def main():
     student_model = wideresnet28()
-    teacher_data = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False},
+    teacher_data = td.TeacherData(data_dic={'clean_train_data': False, 'clean_test_data': True,
+                                            'perturb_train_data': False, 'perturb_test_data': False},
                                   m_forward=512)
     workers = 4
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
@@ -52,13 +54,19 @@ def main():
         log=True,
         logdir=args.log_dir[0]
     )
+    soft_target_KD.evaluate_teacher()
 
-    soft_target_KD.train_student()
-    soft_target_KD.evaluate()
+    # soft_target_KD.train_student()
+    # soft_target_KD.evaluate()
 
 
 if __name__ == '__main__':
+    random.seed(42)
     main()
+
+    # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
+    # print("hi")
+
 
     # torch.set_printoptions(threshold=10_000)
     # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
