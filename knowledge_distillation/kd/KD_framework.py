@@ -296,3 +296,17 @@ class KDFramework:
         """
 
         pass
+
+    # TODO: Create a plot of the training and testing loss and accuracy using the event log created with self.writer
+    # https://stackoverflow.com/questions/36700404/tensorflow-opening-log-data-written-by-summarywriter
+    def plot_results(self):
+        # from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+        # event_acc = EventAccumulator('/path/to/summary/folder')
+        # event_acc.Reload()
+        # # Show all tags in the log file
+        # print(event_acc.Tags())
+        #
+        # # E. g. get wall clock, number of steps and value for a scalar 'Accuracy'
+        # w_times, step_nums, vals = zip(*event_acc.Scalars('Accuracy'))
+        pass
+
