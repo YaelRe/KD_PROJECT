@@ -141,7 +141,7 @@ class KDFramework:
 
             epoch_acc = correct / length_of_dataset
 
-            _, epoch_val_acc = self._evaluate_model(self.student_model, verbose=True)
+            _, epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
 
             if epoch_val_acc > best_acc:
                 best_acc = epoch_val_acc
@@ -153,6 +153,7 @@ class KDFramework:
                 self.writer.add_scalar("Training loss/Student", epoch_loss, epochs)
                 self.writer.add_scalar("Training accuracy/Student", epoch_acc, epochs)
                 self.writer.add_scalar("Validation accuracy/Student", epoch_val_acc, epochs)
+                self.writer.add_scalar("Validation Teacher accuracy/Student", epoch_val_acc, epochs)
 
             loss_arr.append(epoch_loss)
             print(
@@ -232,7 +233,7 @@ class KDFramework:
             print("-" * 80)
             print("Validation Accuracy: {}".format(accuracy))
             print("Student Teacher Validation Accuracy: {}".format(student_teacher_accuracy))
-        return outputs, accuracy
+        return outputs, accuracy, student_teacher_accuracy
 
     def evaluate(self):
         """
@@ -241,7 +242,7 @@ class KDFramework:
         """
 
         model = deepcopy(self.student_model).to(self.device)
-        _, accuracy = self._evaluate_model(model)
+        _, accuracy, _ = self._evaluate_model(model)
 
         return accuracy
 
