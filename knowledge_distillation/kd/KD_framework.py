@@ -50,7 +50,7 @@ class KDFramework:
         self.logdir = logdir
 
         if self.log:
-            self.writer = SummaryWriter(logdir)
+            self.writer = SummaryWriter(log_dir=logdir, filename_suffix='png')
 
         if device == "cpu":
             print('device == cpu')
@@ -148,7 +148,6 @@ class KDFramework:
                 self.best_student_model_weights = deepcopy(
                     self.student_model.state_dict()
                 )
-
             if self.log:
                 self.writer.add_scalar("Training loss/Student", epoch_loss, epochs)
                 self.writer.add_scalar("Training accuracy/Student", epoch_acc, epochs)
@@ -166,6 +165,7 @@ class KDFramework:
         if save_model:
             torch.save(self.student_model.state_dict(), save_model_pth)
         if plot_losses:
+            print('plotting graph:')
             plt.plot(loss_arr)
 
     def train_student(
@@ -214,7 +214,7 @@ class KDFramework:
                 student_output = model(data)
 
                 teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
-                                                                                 image_indices=image_indices.tolist())
+                                                                                    image_indices=image_indices.tolist())
                 teacher_output = teacher_output.to(self.device)
                 if isinstance(student_output, tuple):
                     student_output = student_output[0]
@@ -261,7 +261,7 @@ class KDFramework:
             for _, target, image_indices in self.val_loader:
                 target = target.to(self.device)
                 output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
-                                                                                 image_indices=image_indices.tolist())
+                                                                            image_indices=image_indices.tolist())
                 output = output.to(self.device)
                 # output = model(data)
 
@@ -300,6 +300,7 @@ class KDFramework:
 
     # TODO: Create a plot of the training and testing loss and accuracy using the event log created with self.writer
     # https://stackoverflow.com/questions/36700404/tensorflow-opening-log-data-written-by-summarywriter
+    # https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html
     def plot_results(self):
         # from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
         # event_acc = EventAccumulator('/path/to/summary/folder')
@@ -310,4 +311,3 @@ class KDFramework:
         # # E. g. get wall clock, number of steps and value for a scalar 'Accuracy'
         # w_times, step_nums, vals = zip(*event_acc.Scalars('Accuracy'))
         pass
-

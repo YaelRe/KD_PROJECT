@@ -2,6 +2,7 @@ import torchvision
 import torch
 import pandas as pd
 import random
+import datetime
 
 from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
@@ -12,6 +13,7 @@ import knowledge_distillation.kd.teacher_data as td
 
 
 def main():
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     student_model = wideresnet28()
     teacher_data = td.TeacherData(data_dic={'clean_train_data': True, 'clean_test_data': True,
                                             'perturb_train_data': False, 'perturb_test_data': False},
@@ -31,7 +33,8 @@ def main():
                          'temperature': 2,
                          'distil_weight': 0.3,
                          'device': 'cuda',
-                         'log_dir': 'knowledge_distillation/logs/'}, index=[0])
+                         'log_dir': 'knowledge_distillation/logs/' + current_time
+                         }, index=[0])
 
     optimizer_student = torch.optim.SGD(
         student_model.parameters(),
