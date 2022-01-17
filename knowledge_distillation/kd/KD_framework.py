@@ -50,7 +50,7 @@ class KDFramework:
         self.logdir = logdir
 
         if self.log:
-            self.writer = SummaryWriter(log_dir=logdir, filename_suffix='png')
+            self.writer = SummaryWriter(log_dir=logdir)
 
         if device == "cpu":
             print('device == cpu')
@@ -149,10 +149,10 @@ class KDFramework:
                     self.student_model.state_dict()
                 )
             if self.log:
-                self.writer.add_scalar("Training loss/Student", epoch_loss, epochs)
-                self.writer.add_scalar("Training accuracy/Student", epoch_acc, epochs)
-                self.writer.add_scalar("Validation accuracy/Student", epoch_val_acc, epochs)
-                self.writer.add_scalar("Validation Teacher accuracy/Student", epoch_val_acc, epochs)
+                self.writer.add_scalar("Training loss/Student", epoch_loss, ep)
+                self.writer.add_scalar("Training accuracy/Student", epoch_acc, ep)
+                self.writer.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
+                self.writer.add_scalar("Validation Teacher accuracy/Student", epoch_val_acc, ep)
 
             loss_arr.append(epoch_loss)
             print(
@@ -161,6 +161,8 @@ class KDFramework:
                 )
             )
 
+        if self.log:
+            self.writer.close()
         self.student_model.load_state_dict(self.best_student_model_weights)
         if save_model:
             torch.save(self.student_model.state_dict(), save_model_pth)
