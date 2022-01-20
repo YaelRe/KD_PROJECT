@@ -27,11 +27,11 @@ def main():
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.001,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
-                         'decay': 0.001,
+                         'decay': 0.0001,
                          'temperature': 2,
-                         'distil_weight': 0.3,
+                         'distil_weight': 0.5,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
