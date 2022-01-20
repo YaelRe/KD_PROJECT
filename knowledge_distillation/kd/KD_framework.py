@@ -50,7 +50,10 @@ class KDFramework:
         self.logdir = logdir
 
         if self.log:
-            self.writer = SummaryWriter(log_dir=logdir)
+            self.writer_train_student_loss = SummaryWriter(log_dir=logdir+"_train_student_loss")
+            self.writer_train_student_acc = SummaryWriter(log_dir=logdir+"_train_student_acc")
+            self.writer_val_student_acc = SummaryWriter(log_dir=logdir+"_val_student_acc")
+            self.writer_val_student_teacher_acc = SummaryWriter(log_dir=logdir+"_val_student_teacher_acc")
 
         if device == "cpu":
             print('device == cpu')
@@ -149,10 +152,10 @@ class KDFramework:
                     self.student_model.state_dict()
                 )
             if self.log:
-                self.writer.add_scalar("Training loss/Student", epoch_loss, ep)
-                self.writer.add_scalar("Training accuracy/Student", epoch_acc, ep)
-                self.writer.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
-                self.writer.add_scalar("Validation Teacher accuracy/Student", epoch_val_acc, ep)
+                self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
+                self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
+                self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
+                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
 
             loss_arr.append(epoch_loss)
             print(
@@ -162,13 +165,16 @@ class KDFramework:
             )
 
         if self.log:
-            self.writer.close()
+            self.writer_train_student_loss.close()
+            self.writer_train_student_acc.close()
+            self.writer_val_student_acc.close()
+            self.writer_val_student_teacher_acc.close()
         self.student_model.load_state_dict(self.best_student_model_weights)
         if save_model:
             torch.save(self.student_model.state_dict(), save_model_pth)
         if plot_losses:
             # TODO: not printing plot
-            print('plotting graph:', loss_arr)
+            print('------> plotting graph:', loss_arr)
             plt.plot(loss_arr)
 
     def train_student(
