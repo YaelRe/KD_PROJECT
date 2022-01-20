@@ -14,11 +14,11 @@ import knowledge_distillation.kd.teacher_data as td
 
 def main():
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    load_student_model = True  # TODO: load it from params file
+    load_student_model = False  # TODO: load it from params file
     student_model = wideresnet28()
 
     if load_student_model:
-        resume_path = './models/student.pt'
+        resume_path = 'models/student.pt' # in local : './models/student.pt' in server: 'models/student.pt'
         print("=> loading checkpoint '{}'".format(resume_path))
         checkpoint = torch.load(resume_path, map_location='cpu')  # map_location=device
         # args.start_epoch = checkpoint['epoch'] - 1
@@ -69,9 +69,9 @@ def main():
         logdir=args.log_dir[0]
     )
 
-    # soft_target_KD.train_student(epochs=100)
+    soft_target_KD.train_student(epochs=2)
     soft_target_KD.evaluate()
-    # soft_target_KD.evaluate_teacher()
+    soft_target_KD.evaluate_teacher()
 
 
 def transform_checkpoint(cp):
