@@ -176,7 +176,7 @@ class KDFramework:
             # TODO: not printing plot
             print('plotting graph:', loss_arr)
             plt.plot(loss_arr)
-            plt.show(block=True)
+            plt.show()
 
     def train_student(
             self,
