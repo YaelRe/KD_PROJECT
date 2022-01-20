@@ -174,8 +174,9 @@ class KDFramework:
             torch.save(self.student_model.state_dict(), save_model_pth)
         if plot_losses:
             # TODO: not printing plot
-            print('------> plotting graph:', loss_arr)
+            print('plotting graph:', loss_arr)
             plt.plot(loss_arr)
+            plt.show()
 
     def train_student(
             self,
