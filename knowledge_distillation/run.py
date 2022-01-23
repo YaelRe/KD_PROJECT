@@ -57,7 +57,17 @@ parser.add_argument('--random-start', default=True, type=bool)
 
 def main():
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    load_student_model = False  # TODO: load it from params file
     student_model = wideresnet28()
+
+    if load_student_model:
+        resume_path = 'models/student.pt' # in local : './models/student.pt' in server: 'models/student.pt'
+        print("=> loading checkpoint '{}'".format(resume_path))
+        checkpoint = torch.load(resume_path, map_location='cpu')  # map_location=device
+        # args.start_epoch = checkpoint['epoch'] - 1
+        # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+        student_model.load_state_dict(transform_checkpoint(checkpoint)) # TODO: make sure with Adina
+
     teacher_data = td.TeacherData(data_dic={'clean_train_data': True, 'clean_test_data': True,
                                             'perturb_train_data': False, 'perturb_test_data': False},
                                   m_forward=512)
@@ -102,9 +112,19 @@ def main():
         logdir=args.log_dir[0]
     )
 
-    soft_target_KD.train_student(epochs=100)
+    soft_target_KD.train_student(epochs=2)
     soft_target_KD.evaluate()
     soft_target_KD.evaluate_teacher()
+
+
+def transform_checkpoint(cp):
+    new_cp = {}
+    for entry in cp:
+        new_name=entry.replace('module.', '')
+        if new_name.startswith('1.'):
+            new_name=new_name[2:]
+        new_cp[new_name] = cp[entry]
+    return new_cp
 
 
 if __name__ == '__main__':
