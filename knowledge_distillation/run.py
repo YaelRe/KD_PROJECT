@@ -3,6 +3,7 @@ import torch
 import pandas as pd
 import random
 import datetime
+import argparse
 
 from models.wideresnet import wideresnet28
 from data_loaders.cifar_data import get_loaders
@@ -11,6 +12,48 @@ from util.cross_entropy import CrossEntropyLoss
 from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import knowledge_distillation.kd.teacher_data as td
 
+parser = argparse.ArgumentParser(description='KD Training')
+parser.add_argument('clean_train_data', type=bool)
+parser.add_argument('perturb_train_data', type=bool)
+parser.add_argument('clean_test_data', type=bool)
+parser.add_argument('perturb_test_data', type=bool)
+parser.add_argument('log-dir', type=str, help='folder to save model and training log')
+parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
+parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
+parser.add_argument('--epochs', default=90, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--temperature', default=2.0, type=float, metavar='T')
+parser.add_argument('--distill-weight', default=0.5, type=float, metavar='DW')
+parser.add_argument('--gpu', default=None, type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
+
+
+#####################
+# Attack params
+parser.add_argument('--adv-training', action='store_true')
+parser.add_argument('--attack', default='PGD', type=str, choices=['EPGD', 'PGD'])
+parser.add_argument('--epsilon', default=64.0, type=float)
+parser.add_argument('--num-steps', default=10, type=int)
+parser.add_argument('--warmup', default=1, type=int, help="Number of epochs over which \
+-                    the maximum allowed perturbation increases linearly from zero to args.epsilon.")
+parser.add_argument('--num-noise-vec', default=1, type=int,
+                    help="number of noise vectors to use for finding adversarial examples. `m_train` in the paper.")
+parser.add_argument('--train-multi-noise', action='store_true',
+                    help="if included, the weights of the network are optimized using all the noise samples. \
+-                       Otherwise, only one of the samples is used.")
+parser.add_argument('--no-grad-attack', action='store_true',
+                    help="Choice of whether to use gradients during attack or do the cheap trick")
+
+# PGD-specific
+parser.add_argument('--random-start', default=True, type=bool)
+# TODO: EPGD-specific?
+
+# args = parser.parse_args()
+#
+# args.epsilon /= 256.0
+# args.init_norm_DDN /= 256.0
+
+# torch.manual_seed(0)
+# torch.cuda.manual_seed_all(0)
 
 def main():
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -31,7 +74,7 @@ def main():
                          'nesterov_momentum': True,
                          'decay': 0.001,
                          'temperature': 2,
-                         'distil_weight': 0.3,
+                         'distill_weight': 0.3,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
@@ -53,7 +96,7 @@ def main():
         optimizer_student=optimizer_student,
         loss_fn=torch.nn.MSELoss(),
         temp=args.temperature[0],
-        distil_weight=args.distil_weight[0],
+        distil_weight=args.distill_weight[0],
         device=args.device[0],
         log=True,
         logdir=args.log_dir[0]
@@ -70,11 +113,8 @@ if __name__ == '__main__':
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
 
-
     # torch.set_printoptions(threshold=10_000)
     # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
     # temp_image_indices = list(range(255))
     # batch_teacher_out = teacher_data1.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
     # print(batch_teacher_out)
-
-
