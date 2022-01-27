@@ -24,7 +24,7 @@ class PGD(Attack):
         self.rand_init = rand_init
 
     def perturb(self, x, y=None, eps=0.001, targeted=False):
-        self.model.requires_grad(False)  # added for memory optimization
+        # self.model.requires_grad(False)  # added for memory optimization # Adina Yael!
         self.model.eval()
 
         x = x.clone().detach()

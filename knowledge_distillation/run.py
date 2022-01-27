@@ -6,8 +6,10 @@ import datetime
 import argparse
 
 from models.wideresnet import wideresnet28
+from attacks import PGD, EPGD
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
+import torch.nn.functional as F
 
 from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import knowledge_distillation.kd.teacher_data as td
@@ -81,12 +83,15 @@ def main():
                                                workers=workers)
 
     # TODO: extract it?
+    # 'student_loss': torch.nn.MSELoss(),
+    # 'student_loss': F.cross_entropy,
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.001,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
-                         'decay': 0.001,
+                         'decay': 0.0001,
                          'temperature': 2,
-                         'distill_weight': 0.3,
+                         'distill_weight': 0.5,
+                         'student_loss':  F.cross_entropy,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
@@ -103,17 +108,20 @@ def main():
         weight_decay=args.decay[0],)
     print(f'lr = {args.learning_rate[0]}')
 
+    att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
+
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
         teacher_data=teacher_data,
         student_model=student_model,
         train_loader=train_loader,
         val_loader=test_loader,
-        optimizer_student=optimizer_student_ADAM,
+        optimizer_student=optimizer_student_SGD,
         loss_fn=torch.nn.MSELoss(),
         temp=args.temperature[0],
         distil_weight=args.distill_weight[0],
         device=args.device[0],
+        att_object=att_object,
         log=True,
         logdir=args.log_dir[0]
     )

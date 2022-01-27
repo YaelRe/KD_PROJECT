@@ -33,6 +33,7 @@ class SoftTargetKD(KDFramework):
         temp=20.0,
         distil_weight=0.5,
         device="cpu",
+        att_object=None,
         log=False,
         logdir="./Experiments",
     ):
@@ -46,6 +47,7 @@ class SoftTargetKD(KDFramework):
             temp,
             distil_weight,
             device,
+            att_object,
             log,
             logdir,
         )

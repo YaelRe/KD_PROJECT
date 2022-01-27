@@ -36,6 +36,7 @@ class KDFramework:
             temp=20.0,
             distil_weight=0.5,
             device="cpu",
+            att_object=None,
             log=False,
             logdir="./Experiments",
     ):
@@ -46,6 +47,7 @@ class KDFramework:
         self.optimizer_student = optimizer_student
         self.temp = temp
         self.distil_weight = distil_weight
+        self.att_object = att_object
         self.log = log
         self.logdir = logdir
 
@@ -117,7 +119,11 @@ class KDFramework:
                 data = data.to(self.device)
                 label = label.to(self.device)
 
-                student_out = self.student_model(data)
+                # ===== Adversarial training ===== #
+                x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
+
+                # ===== Regular training ===== #
+                # student_out = self.student_model(data)
                 # TODO: understand what to do about clean vs perturb data
                 teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
                                                                                  image_indices=image_indices.tolist())
