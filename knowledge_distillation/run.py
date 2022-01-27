@@ -91,12 +91,16 @@ def main():
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
 
-    optimizer_student = torch.optim.SGD(
+    optimizer_student_SGD = torch.optim.SGD(
         student_model.parameters(),
         args.learning_rate[0],
         momentum=args.momentum[0],
         weight_decay=args.decay[0],
         nesterov=args.nesterov_momentum[0])
+    optimizer_student_ADAM = torch.optim.Adam(
+        student_model.parameters(),
+        args.learning_rate[0],
+        weight_decay=args.decay[0],)
     print(f'lr = {args.learning_rate[0]}')
 
     # initialize SoftTargetKD object
@@ -105,7 +109,7 @@ def main():
         student_model=student_model,
         train_loader=train_loader,
         val_loader=test_loader,
-        optimizer_student=optimizer_student,
+        optimizer_student=optimizer_student_ADAM,
         loss_fn=torch.nn.MSELoss(),
         temp=args.temperature[0],
         distil_weight=args.distill_weight[0],
