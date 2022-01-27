@@ -25,6 +25,9 @@ class PGD(Attack):
 
     def perturb(self, x, y=None, eps=0.001, targeted=False):
         # self.model.requires_grad(False)  # added for memory optimization # Adina Yael!
+        for param in self.model.parameters():
+            param.requires_grad = False
+
         self.model.eval()
 
         x = x.clone().detach()
