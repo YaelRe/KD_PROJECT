@@ -57,7 +57,7 @@ class Smooth:
             df['batch_number'] = batch_idx
             df['image_indices'] = image_indices
             current_date = date.today().strftime("%b-%d-%Y")
-            output_file_name = save_data_mode + '_output_' + current_date + '.csv'
+            output_file_name = save_data_mode + '_soft_output_' + current_date + '.csv'
             df.to_csv(output_file_name, mode='a', index=False)
 
         pred_prob = -1
@@ -105,6 +105,7 @@ class Smooth:
         return outputs, histogram, predict
 
     def monte_carlo_expectation_predict(self, x, maxk, pred):
+        maxk = 10
         self.eval()
         # with torch.no_grad():
         outputs = self.generate_outputs(x, self.m_forward)
@@ -119,8 +120,8 @@ class Smooth:
         output_list = [output_i.unsqueeze(dim=0).to(x) for output_i in outputs]
         outs = torch.cat(output_list)
         output = outs.mean(dim=0)
-        _, predictions = output.topk(maxk, 1, True, True)
-        return outputs, None, predictions
+        teacher_pred, predictions = output.topk(maxk, 1, True, True)
+        return outputs, teacher_pred, predictions
 
     def base_model_predict(self, x, maxk, pred):
         return pred
