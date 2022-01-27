@@ -20,12 +20,12 @@ parser.add_argument('perturb_test_data', type=bool)
 parser.add_argument('log-dir', type=str, help='folder to save model and training log')
 parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W',
+                    help='weight decay (default: 1e-4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--temperature', default=2.0, type=float, metavar='T')
 parser.add_argument('--distill-weight', default=0.5, type=float, metavar='DW')
 parser.add_argument('--gpu', default=None, type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
-
 
 #####################
 # Attack params
@@ -45,6 +45,8 @@ parser.add_argument('--no-grad-attack', action='store_true',
 
 # PGD-specific
 parser.add_argument('--random-start', default=True, type=bool)
+
+
 # TODO: EPGD-specific?
 
 # args = parser.parse_args()
@@ -61,12 +63,12 @@ def main():
     student_model = wideresnet28()
 
     if load_student_model:
-        resume_path = 'models/student.pt' # in local : './models/student.pt' in server: 'models/student.pt'
+        resume_path = 'models/student.pt'  # in local : './models/student.pt' in server: 'models/student.pt'
         print("=> loading checkpoint '{}'".format(resume_path))
         checkpoint = torch.load(resume_path, map_location='cpu')  # map_location=device
         # args.start_epoch = checkpoint['epoch'] - 1
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        student_model.load_state_dict(transform_checkpoint(checkpoint)) # TODO: make sure with Adina
+        student_model.load_state_dict(transform_checkpoint(checkpoint))  # TODO: make sure with Adina
 
     teacher_data = td.TeacherData(data_dic={'clean_train_data': True, 'clean_test_data': True,
                                             'perturb_train_data': False, 'perturb_test_data': False},
@@ -120,9 +122,9 @@ def main():
 def transform_checkpoint(cp):
     new_cp = {}
     for entry in cp:
-        new_name=entry.replace('module.', '')
+        new_name = entry.replace('module.', '')
         if new_name.startswith('1.'):
-            new_name=new_name[2:]
+            new_name = new_name[2:]
         new_cp[new_name] = cp[entry]
     return new_cp
 
