@@ -54,8 +54,8 @@ parser.add_argument('--random-start', default=True, type=bool)
 # args.epsilon /= 256.0
 # args.init_norm_DDN /= 256.0
 
-# torch.manual_seed(0)
-# torch.cuda.manual_seed_all(0)
+torch.manual_seed(42)
+torch.cuda.manual_seed_all(42)
 
 def main():
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -118,7 +118,7 @@ def main():
         logdir=args.log_dir[0]
     )
 
-    soft_target_KD.train_student(epochs=2)
+    soft_target_KD.train_student(epochs=100)
     soft_target_KD.evaluate()
     soft_target_KD.evaluate_teacher()
 
@@ -134,7 +134,7 @@ def transform_checkpoint(cp):
 
 
 if __name__ == '__main__':
-    random.seed(42)
+    # random.seed(42)
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
