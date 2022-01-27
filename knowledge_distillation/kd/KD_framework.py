@@ -121,8 +121,8 @@ class KDFramework:
 
                 if self.att_object:
                     # ===== Adversarial training ===== #
-                    x_a, output, output_a, _ = self.att_object.perturb(data, label, eps=8/255)
-                    student_out = self.student_model(x_a) # TODO: maybe not necessary and we can use the output_a
+                    x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
+                    # student_out = self.student_model(x_a) # TODO: maybe not necessary and we can use the output_a
 
                 else:
                     # ===== Regular training ===== #
