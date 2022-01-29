@@ -86,7 +86,7 @@ def main():
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.01,
+                         'learning_rate': 0.05,
                          'nesterov_momentum': True,
                          'decay': 0.0001,
                          'temperature': 2,
@@ -108,8 +108,8 @@ def main():
         weight_decay=args.decay[0],)
     print(f'lr = {args.learning_rate[0]}')
 
-    # att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
-    att_object = None
+    att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
+    # att_object = None
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(

@@ -69,6 +69,7 @@ class PGD(Attack):
                 best_ps[succ] = 0.
 
                 loss = multiplier * self.criterion(oi, y)
+                print("loss in inter:" + k + "is: " + loss) ### yael
                 grad = torch.autograd.grad(loss, [pert])[0].detach()
 
                 with torch.no_grad():
@@ -95,5 +96,6 @@ class PGD(Attack):
 
         x_a = x + best_pert
         x_a.detach()
-        o = self.model.forward(x)
+        # o = self.model.forward(x) ### yael
+        o = None ### yael
         return x_a, o, oi, all_succ
