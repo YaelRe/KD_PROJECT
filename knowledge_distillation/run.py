@@ -86,7 +86,7 @@ def main():
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.05,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
                          'decay': 0.0001,
                          'temperature': 2,
