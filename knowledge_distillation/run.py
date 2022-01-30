@@ -92,7 +92,7 @@ def main():
                          'decay': 0.0001,
                          'temperature': 2,
                          'distill_weight': 0.5,
-                         'student_loss': CrossEntropyLoss(),
+                         'student_loss': torch.nn.MSELoss(),
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
