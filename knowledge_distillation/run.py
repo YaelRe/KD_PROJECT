@@ -109,8 +109,8 @@ def main():
         weight_decay=args.decay[0], )
     print(f'lr = {args.learning_rate[0]}')
 
-    att_object = PGD(student_model, args.student_loss[0], n_iter=2, alpha=0.006)
-    # att_object = None
+    # att_object = PGD(student_model, args.student_loss[0], n_iter=2, alpha=0.006)
+    att_object = None
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
