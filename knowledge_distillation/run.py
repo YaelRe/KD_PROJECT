@@ -82,11 +82,11 @@ def main():
 
     # TODO: extract it?
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.001,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
-                         'decay': 0.001,
+                         'decay': 0.0001,
                          'temperature': 2,
-                         'distill_weight': 0.3,
+                         'distill_weight': 0.5,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
@@ -109,7 +109,7 @@ def main():
         student_model=student_model,
         train_loader=train_loader,
         val_loader=test_loader,
-        optimizer_student=optimizer_student_ADAM,
+        optimizer_student=optimizer_student_SGD,
         loss_fn=torch.nn.MSELoss(),
         temp=args.temperature[0],
         distil_weight=args.distill_weight[0],
