@@ -78,13 +78,14 @@ def main():
     workers = 4
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
                                                data="./data",
-                                               batch_size=256,
-                                               val_batch_size=256,
+                                               batch_size=10,
+                                               val_batch_size=10,
                                                workers=workers)
 
     # TODO: extract it?
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
+    # CrossEntropyLoss()
     args = pd.DataFrame({'momentum': 0.9,
                          'learning_rate': 0.01,
                          'nesterov_momentum': True,
