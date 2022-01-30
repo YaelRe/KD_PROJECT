@@ -51,32 +51,31 @@ class PGD(Attack):
 
             pert = self.project(pert, x, eps)
 
-            for k in range(self.n_iter):
-                curr_iter = rest * (self.n_iter + 1) + k
-                pert.requires_grad_()
-                x_i = x + pert
-                with torch.no_grad():
-                    oi = self.model.forward(x_i)
-                probs = torch.softmax(oi, dim=1)
-                succ = torch.argmax(oi, dim=1) != y
-                pi = probs[torch.arange(probs.shape[0]), y].squeeze()
-                if targeted:
-                    pi = 1. - pi
-
-                all_succ[curr_iter] = succ | all_succ[curr_iter - 1]
-                improve = pi < best_ps
-                best_pert[improve] = pert[improve]
-                best_ps[improve] = pi[improve]
-                best_ps[succ] = 0.
-
-                loss = multiplier * self.criterion(oi, y)
-                # print("loss in inter:" + str(k) + "is: " + str(loss)) ### yael
-                grad = torch.autograd.grad(loss, [pert])[0].detach()
-
-                with torch.no_grad():
-                    grad = self.normalize_grad(grad) * a_abs
-                    pert += grad
-                    pert = self.project(pert, x, eps)
+            # for k in range(self.n_iter):
+            #     curr_iter = rest * (self.n_iter + 1) + k
+            #     pert.requires_grad_()
+            #     x_i = x + pert
+            #     oi = self.model.forward(x_i)
+            #     probs = torch.softmax(oi, dim=1)
+            #     succ = torch.argmax(oi, dim=1) != y
+            #     pi = probs[torch.arange(probs.shape[0]), y].squeeze()
+            #     if targeted:
+            #         pi = 1. - pi
+            #
+            #     all_succ[curr_iter] = succ | all_succ[curr_iter - 1]
+            #     improve = pi < best_ps
+            #     best_pert[improve] = pert[improve]
+            #     best_ps[improve] = pi[improve]
+            #     best_ps[succ] = 0.
+            #
+            #     loss = multiplier * self.criterion(oi, y)
+            #     # print("loss in inter:" + str(k) + "is: " + str(loss)) ### yael
+            #     grad = torch.autograd.grad(loss, [pert])[0].detach()
+            #
+            #     with torch.no_grad():
+            #         grad = self.normalize_grad(grad) * a_abs
+            #         pert += grad
+            #         pert = self.project(pert, x, eps)
 
             with torch.no_grad():
                 x_i = x + pert
