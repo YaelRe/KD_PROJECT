@@ -120,6 +120,7 @@ class KDFramework:
                 if self.att_object:
                     # ===== Adversarial training ===== #
                     x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
+                    data.requires_grad = True
                     # x_a.requires_grad = False
                     # print(torch.eq(data[0], x_a[0]))
                     # student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
