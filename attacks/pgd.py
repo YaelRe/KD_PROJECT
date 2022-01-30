@@ -77,25 +77,26 @@ class PGD(Attack):
             #         pert += grad
             #         pert = self.project(pert, x, eps)
 
-            with torch.no_grad():
-                x_i = x + pert
-                oi = self.model.forward(x_i)
-                probs = torch.softmax(oi, dim=1)
-                succ = torch.argmax(oi, dim=1) != y
-                pi = probs[torch.arange(probs.shape[0]), y].squeeze()
-                if targeted:
-                    pi = 1. - pi
-
-                curr_iter = rest * (self.n_iter + 1) + self.n_iter
-                all_succ[curr_iter] = succ | all_succ[curr_iter - 1]
-
-                improve = pi < best_ps
-                best_pert[improve] = pert[improve]
-                best_ps[improve] = pi[improve]
-                best_ps[succ] = 0.
+            # with torch.no_grad():
+            #     x_i = x + pert
+            #     oi = self.model.forward(x_i)
+            #     probs = torch.softmax(oi, dim=1)
+            #     succ = torch.argmax(oi, dim=1) != y
+            #     pi = probs[torch.arange(probs.shape[0]), y].squeeze()
+            #     if targeted:
+            #         pi = 1. - pi
+            #
+            #     curr_iter = rest * (self.n_iter + 1) + self.n_iter
+            #     all_succ[curr_iter] = succ | all_succ[curr_iter - 1]
+            #
+            #     improve = pi < best_ps
+            #     best_pert[improve] = pert[improve]
+            #     best_ps[improve] = pi[improve]
+            #     best_ps[succ] = 0.
 
         x_a = x + best_pert
         x_a.detach()
         # o = self.model.forward(x) ### yael
         o = None ### yael
+        oi = None ### yael
         return x_a, o, oi, all_succ
