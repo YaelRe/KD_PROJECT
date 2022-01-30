@@ -55,8 +55,8 @@ parser.add_argument('--random-start', default=True, type=bool)
 # args.epsilon /= 256.0
 # args.init_norm_DDN /= 256.0
 
-torch.manual_seed(42)
-torch.cuda.manual_seed_all(42)
+# torch.manual_seed(42)
+# torch.cuda.manual_seed_all(42)
 
 
 def main():
@@ -144,8 +144,8 @@ def transform_checkpoint(cp):
 
 
 if __name__ == '__main__':
-    # random.seed(42)
-    torch.set_printoptions(threshold=10_000)
+    random.seed(42)
+    # torch.set_printoptions(threshold=10_000)
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
