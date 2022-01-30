@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-import matplotlib.pyplot as plt
 from copy import deepcopy
 import os
 
@@ -96,7 +95,6 @@ class KDFramework:
         :param save_model_pth (str): Path where you want to save the student model
         """
 
-        # self.teacher_model.eval()
         self.student_model.train()
         loss_arr = []
         length_of_dataset = len(self.train_loader.dataset)  # TODO: make sure that 50000 is ok..
@@ -156,11 +154,6 @@ class KDFramework:
                 self.optimizer_student.step()
 
                 epoch_loss += loss.item()
-                # print(
-                #     "Batch: {}, Loss: {}, Correct: {}".format(
-                #         batch_index + 1, epoch_loss, correct
-                #     )
-                # )
 
             epoch_acc = correct / length_of_dataset
 

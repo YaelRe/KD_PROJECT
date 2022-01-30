@@ -48,7 +48,6 @@ parser.add_argument('--no-grad-attack', action='store_true',
 # PGD-specific
 parser.add_argument('--random-start', default=True, type=bool)
 
-
 # TODO: EPGD-specific?
 
 # args = parser.parse_args()
@@ -58,6 +57,7 @@ parser.add_argument('--random-start', default=True, type=bool)
 
 torch.manual_seed(42)
 torch.cuda.manual_seed_all(42)
+
 
 def main():
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -91,7 +91,7 @@ def main():
                          'decay': 0.0001,
                          'temperature': 2,
                          'distill_weight': 0.5,
-                         'student_loss':  CrossEntropyLoss(),
+                         'student_loss': CrossEntropyLoss(),
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
@@ -105,7 +105,7 @@ def main():
     optimizer_student_ADAM = torch.optim.Adam(
         student_model.parameters(),
         args.learning_rate[0],
-        weight_decay=args.decay[0],)
+        weight_decay=args.decay[0], )
     print(f'lr = {args.learning_rate[0]}')
 
     att_object = PGD(student_model, args.student_loss[0], n_iter=2, alpha=0.006)

@@ -3,6 +3,13 @@ import pandas as pd
 import numpy as np
 
 
+def load_teacher_data_from_csv(file_name):
+    clean_df = pd.read_csv(file_name)
+    clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
+    clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
+    return clean_df
+
+
 class TeacherData:
     def __init__(self, data_dic, m_forward=8):
         self.num_classes = 10
@@ -15,34 +22,22 @@ class TeacherData:
         self._read_teacher_outputs(data_dic)
 
     def _read_teacher_outputs(self, data_dic):
+        # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
         if data_dic['clean_train_data'] is True:
-            # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
-            csv_file_name = './teacher_data/clean_train_data_output.csv'
-            clean_df = pd.read_csv(csv_file_name)
-            clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
-            clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
-            self.clean_train_outputs = clean_df
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
+            self.clean_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['perturb_train_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/perturb_train_data_output.csv'
-            perturb_df = pd.read_csv(csv_file_name)
-            perturb_df = perturb_df.drop(perturb_df[perturb_df.image_indices == 'image_indices'].index)
-            perturb_df["image_indices"] = pd.to_numeric(perturb_df["image_indices"])
-            self.perturb_train_outputs = perturb_df
+            self.perturb_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['clean_test_data'] is True:
-            csv_file_name = './teacher_data/clean_test_data_output.csv'
-            clean_df = pd.read_csv(csv_file_name)
-            clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
-            clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
-            self.clean_test_outputs = clean_df
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
+            self.clean_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['perturb_test_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/perturb_test_data_output.csv'
-            perturb_df = pd.read_csv(csv_file_name)
-            perturb_df = perturb_df.drop(perturb_df[perturb_df.image_indices == 'image_indices'].index)
-            perturb_df["image_indices"] = pd.to_numeric(perturb_df["image_indices"])
-            self.perturb_test_outputs = perturb_df
+            self.perturb_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
     def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices: list):
         batch_histogram_outputs = outputs_df.loc[outputs_df['image_indices'].isin(image_indices)]
@@ -68,7 +63,3 @@ class TeacherData:
             df = self.perturb_test_outputs
         df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
         return self._generate_prediction_smoothing_outputs(df_batch)
-
-
-
-
