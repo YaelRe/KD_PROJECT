@@ -108,7 +108,7 @@ def main():
         weight_decay=args.decay[0],)
     print(f'lr = {args.learning_rate[0]}')
 
-    att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
+    att_object = PGD(student_model, args.student_loss[0], n_iter=2, alpha=0.006)
     # att_object = None
 
     # initialize SoftTargetKD object
@@ -144,6 +144,7 @@ def transform_checkpoint(cp):
 
 if __name__ == '__main__':
     # random.seed(42)
+    torch.set_printoptions(threshold=10_000)
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))

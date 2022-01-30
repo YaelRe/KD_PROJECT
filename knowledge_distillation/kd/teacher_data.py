@@ -17,7 +17,7 @@ class TeacherData:
     def _read_teacher_outputs(self, data_dic):
         if data_dic['clean_train_data'] is True:
             # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
-            csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
+            csv_file_name = './teacher_data/clean_train_data_output.csv'
             clean_df = pd.read_csv(csv_file_name)
             clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
             clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])
@@ -31,7 +31,7 @@ class TeacherData:
             self.perturb_train_outputs = perturb_df
 
         if data_dic['clean_test_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
+            csv_file_name = './teacher_data/clean_test_data_output.csv'
             clean_df = pd.read_csv(csv_file_name)
             clean_df = clean_df.drop(clean_df[clean_df.image_indices == 'image_indices'].index)
             clean_df["image_indices"] = pd.to_numeric(clean_df["image_indices"])

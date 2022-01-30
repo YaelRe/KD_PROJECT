@@ -122,15 +122,17 @@ class KDFramework:
                 if self.att_object:
                     # ===== Adversarial training ===== #
                     x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
-                    x_a = x_a.to(self.device)
-                    student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
-                    if batch_index == 0:
-                        print("requires_grad----->" + str(data.requires_grad))
-                        print("requires_grad----->" + str(x_a.requires_grad))
-                        print("_backward_hooks --------->" +str( data._backward_hooks))
-                        print("_backward_hooks --------->" + str(x_a._backward_hooks))
-                        print("_grad------>" + str(data._grad))
-                        print("_grad------>" + str(x_a._grad))
+                    # x_a.requires_grad = False
+                    # print(torch.eq(data[0], x_a[0]))
+                    # student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
+                    student_out = self.student_model(data)
+                    # if batch_index == 0:
+                    #     print("requires_grad----->" + str(data.requires_grad))
+                    #     print("requires_grad----->" + str(x_a.requires_grad))
+                    #     print("_backward_hooks --------->" +str( data._backward_hooks))
+                    #     print("_backward_hooks --------->" + str(x_a._backward_hooks))
+                    #     print("_grad------>" + str(data._grad))
+                    #     print("_grad------>" + str(x_a._grad))
 
                 else:
                     # ===== Regular training ===== #
