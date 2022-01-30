@@ -28,28 +28,28 @@ class PGD(Attack):
         for param in self.model.parameters():
             param.requires_grad = False
 
-        self.model.eval()
+        # self.model.eval()
 
         x = x.clone().detach()
         predict_y = False
-        if y is None:
-            predict_y = True
-            y = self.model.predict(x)
+        # if y is None:
+        #     predict_y = True
+        #     y = self.model.predict(x)
         a_abs = np.abs(eps / self.n_iter) if self.alpha is None else np.abs(self.alpha)
         multiplier = 1 if targeted else -1
 
         best_ps = torch.ones_like(y).to(x)
         best_pert = torch.zeros_like(x)
 
-        self.model.eval()
+        # self.model.eval()
         all_succ = torch.zeros(self.n_restarts * (self.n_iter + 1), x.shape[0], dtype=torch.bool).to(x.device)
-        for rest in range(self.n_restarts):
-            pert = torch.zeros_like(x, requires_grad=True)
-
-            if self.rand_init or predict_y:
-                pert = self.random_initialization(pert, eps)
-
-            pert = self.project(pert, x, eps)
+        # for rest in range(self.n_restarts):
+        #     pert = torch.zeros_like(x, requires_grad=True)
+        #
+        #     if self.rand_init or predict_y:
+        #         pert = self.random_initialization(pert, eps)
+        #
+        #     pert = self.project(pert, x, eps)
 
             # for k in range(self.n_iter):
             #     curr_iter = rest * (self.n_iter + 1) + k
