@@ -24,25 +24,25 @@ class PGD(Attack):
         self.rand_init = rand_init
 
     def perturb(self, x, y=None, eps=0.001, targeted=False):
-        # self.model.requires_grad(False)  # added for memory optimization # Adina Yael!
-        for param in self.model.parameters():
-            param.requires_grad = False
-
-        # self.model.eval()
-
-        x = x.clone().detach()
-        predict_y = False
-        # if y is None:
-        #     predict_y = True
-        #     y = self.model.predict(x)
-        a_abs = np.abs(eps / self.n_iter) if self.alpha is None else np.abs(self.alpha)
-        multiplier = 1 if targeted else -1
-
-        best_ps = torch.ones_like(y).to(x)
-        best_pert = torch.zeros_like(x)
-
-        # self.model.eval()
-        all_succ = torch.zeros(self.n_restarts * (self.n_iter + 1), x.shape[0], dtype=torch.bool).to(x.device)
+        # # self.model.requires_grad(False)  # added for memory optimization # Adina Yael!
+        # for param in self.model.parameters():
+        #     param.requires_grad = False
+        #
+        # # self.model.eval()
+        #
+        # x = x.clone().detach()
+        # predict_y = False
+        # # if y is None:
+        # #     predict_y = True
+        # #     y = self.model.predict(x)
+        # a_abs = np.abs(eps / self.n_iter) if self.alpha is None else np.abs(self.alpha)
+        # multiplier = 1 if targeted else -1
+        #
+        # best_ps = torch.ones_like(y).to(x)
+        # best_pert = torch.zeros_like(x)
+        #
+        # # self.model.eval()
+        # all_succ = torch.zeros(self.n_restarts * (self.n_iter + 1), x.shape[0], dtype=torch.bool).to(x.device)
         # for rest in range(self.n_restarts):
         #     pert = torch.zeros_like(x, requires_grad=True)
         #
@@ -94,9 +94,11 @@ class PGD(Attack):
             #     best_ps[improve] = pi[improve]
             #     best_ps[succ] = 0.
 
-        x_a = x + best_pert
-        x_a.detach()
+        # x_a = x + best_pert
+        # x_a.detach()
         # o = self.model.forward(x) ### yael
         o = None ### yael
         oi = None ### yael
+        x_a = None ### yael
+        all_succ = None ### yael
         return x_a, o, oi, all_succ
