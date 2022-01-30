@@ -55,8 +55,8 @@ class PGD(Attack):
                 curr_iter = rest * (self.n_iter + 1) + k
                 pert.requires_grad_()
                 x_i = x + pert
-                oi = x_i ###### yael
-                # oi = self.model.forward(x_i)
+                with torch.no_grad():
+                    oi = self.model.forward(x_i)
                 probs = torch.softmax(oi, dim=1)
                 succ = torch.argmax(oi, dim=1) != y
                 pi = probs[torch.arange(probs.shape[0]), y].squeeze()
