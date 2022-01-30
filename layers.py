@@ -113,7 +113,7 @@ class NoisedConv2DColored(nn.Conv2d):  # TODO: parametrize
                                             self.alphaf_o,
                                             torch.std(out) * self.alphad_o)
             out = out + m.view_as(out[0, :])
-        # assert torch.all(torch.isfinite(out))
+        assert torch.all(torch.isfinite(out))
         return out
 
 
