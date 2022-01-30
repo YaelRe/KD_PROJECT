@@ -86,12 +86,12 @@ def main():
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.05,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
                          'decay': 0.0001,
                          'temperature': 2,
                          'distill_weight': 0.5,
-                         'student_loss': CrossEntropyLoss(),
+                         'student_loss': F.cross_entropy,
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
