@@ -78,8 +78,8 @@ def main():
     workers = 4
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
                                                data="./data",
-                                               batch_size=10,
-                                               val_batch_size=10,
+                                               batch_size=256,
+                                               val_batch_size=256,
                                                workers=workers)
 
     # TODO: extract it?
