@@ -147,7 +147,7 @@ def main():
         device=args.device,
         att_object=att_object,
         log=True,
-        logdir=args.log_dir + current_time
+        logdir='knowledge_distillation/logs/' + current_time
     )
 
     soft_target_KD.train_student(epochs=args.epochs)
