@@ -55,8 +55,8 @@ parser.add_argument('--random-start', default=True, type=bool)
 # args.epsilon /= 256.0
 # args.init_norm_DDN /= 256.0
 
-torch.manual_seed(42)
-torch.cuda.manual_seed_all(42)
+# torch.manual_seed(42)
+# torch.cuda.manual_seed_all(42)
 
 
 def main():
@@ -85,13 +85,14 @@ def main():
     # TODO: extract it?
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
+    # CrossEntropyLoss()
     args = pd.DataFrame({'momentum': 0.9,
-                         'learning_rate': 0.05,
+                         'learning_rate': 0.01,
                          'nesterov_momentum': True,
                          'decay': 0.0001,
                          'temperature': 2,
                          'distill_weight': 0.5,
-                         'student_loss': CrossEntropyLoss(),
+                         'student_loss': torch.nn.MSELoss(),
                          'device': 'cuda',
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
@@ -108,8 +109,8 @@ def main():
         weight_decay=args.decay[0], )
     print(f'lr = {args.learning_rate[0]}')
 
-    att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
-    # att_object = None
+    # att_object = PGD(student_model, args.student_loss[0], n_iter=2, alpha=0.006)
+    att_object = None
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
@@ -143,12 +144,12 @@ def transform_checkpoint(cp):
 
 
 if __name__ == '__main__':
-    # random.seed(42)
+    random.seed(42)
+    # torch.set_printoptions(threshold=10_000)
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
 
-    # torch.set_printoptions(threshold=10_000)
     # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
     # temp_image_indices = list(range(255))
     # batch_teacher_out = teacher_data1.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
