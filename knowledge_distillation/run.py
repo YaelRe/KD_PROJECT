@@ -15,25 +15,36 @@ from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import knowledge_distillation.kd.teacher_data as td
 
 parser = argparse.ArgumentParser(description='KD Training')
-parser.add_argument('clean_train_data', type=bool)
-parser.add_argument('perturb_train_data', type=bool)
-parser.add_argument('clean_test_data', type=bool)
-parser.add_argument('perturb_test_data', type=bool)
-parser.add_argument('log-dir', type=str, help='folder to save model and training log')
+parser.add_argument('--clean_train_data', default=True, type=bool)
+parser.add_argument('--perturb_train_data', default=False, type=bool)
+parser.add_argument('--clean_test_data', default=True, type=bool)
+parser.add_argument('--perturb_test_data', default=False, type=bool)
+parser.add_argument('--log_dir', '--log-dir', type=str, default='knowledge_distillation/logs/', help='folder to save model and training log')
 parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W',
+parser.add_argument('--nesterov_momentum', default=True, type=bool)
+parser.add_argument('--weight-decay', '--weight_decay', default=1e-4, type=float, metavar='W',
                     help='weight decay (default: 1e-4)')
-parser.add_argument('--epochs', default=90, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--m_forward', default=512, type=int)
+parser.add_argument('--batch_size', default=256, type=int)
+parser.add_argument('--epochs', default=100, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--temperature', default=2.0, type=float, metavar='T')
-parser.add_argument('--distill-weight', default=0.5, type=float, metavar='DW')
+parser.add_argument('--distill_weight', default=0.5, type=float, metavar='DW')
+parser.add_argument('--loss', default='MSE', type=str)
+parser.add_argument('--opt', default='SGD', type=str)
 parser.add_argument('--gpu', default=None, type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
+parser.add_argument('--device', default='cuda', type=str)
+parser.add_argument('--workers', default=4, type=int)
+parser.add_argument('--load_student_model', default=False, type=bool, help='load the student model from a file')
 
 #####################
 # Attack params
-parser.add_argument('--adv-training', action='store_true')
+parser.add_argument('--adv-training2', action='store_true')
+parser.add_argument('--adv_training', default=False, type=bool)  # yael
 parser.add_argument('--attack', default='PGD', type=str, choices=['EPGD', 'PGD'])
 parser.add_argument('--epsilon', default=64.0, type=float)
+parser.add_argument('--n_iter', default=10, type=int)
+parser.add_argument('--alpha', default=0.006, type=int)
 parser.add_argument('--num-steps', default=10, type=int)
 parser.add_argument('--warmup', default=1, type=int, help="Number of epochs over which \
 -                    the maximum allowed perturbation increases linearly from zero to args.epsilon.")
@@ -50,8 +61,6 @@ parser.add_argument('--random-start', default=True, type=bool)
 
 # TODO: EPGD-specific?
 
-# args = parser.parse_args()
-#
 # args.epsilon /= 256.0
 # args.init_norm_DDN /= 256.0
 
@@ -60,8 +69,9 @@ torch.cuda.manual_seed_all(42)
 
 
 def main():
+    args = parser.parse_args()
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    load_student_model = False  # TODO: load it from params file
+    load_student_model = args.load_student_model  # TODO: load it from params file
     student_model = wideresnet28()
 
     if load_student_model:
@@ -70,22 +80,28 @@ def main():
         checkpoint = torch.load(resume_path, map_location='cpu')  # map_location=device
         # args.start_epoch = checkpoint['epoch'] - 1
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        student_model.load_state_dict(transform_checkpoint(checkpoint))  # TODO: make sure with Adina
+        student_model.load_state_dict(transform_checkpoint(checkpoint))
 
-    teacher_data = td.TeacherData(data_dic={'clean_train_data': True, 'clean_test_data': True,
-                                            'perturb_train_data': False, 'perturb_test_data': False},
-                                  m_forward=512)
-    workers = 4
+    teacher_data = td.TeacherData(data_dic={'clean_train_data': args.clean_train_data, 'clean_test_data': args.clean_test_data,
+                                            'perturb_train_data': args.perturb_train_data, 'perturb_test_data': args.perturb_test_data},
+                                  m_forward=args.m_forward)
+    workers = args.workers
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
                                                data="./data",
-                                               batch_size=256,
-                                               val_batch_size=256,
+                                               batch_size=args.batch_size,
+                                               val_batch_size=args.batch_size,
                                                workers=workers)
 
-    # TODO: extract it?
     # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
-    args = pd.DataFrame({'momentum': 0.9,
+    if args.loss == 'MSE':
+        student_loss = torch.nn.MSELoss()
+    elif args.loss == 'CrossEntropy':
+        student_loss = CrossEntropyLoss()
+    else:
+        raise Exception("error: loss function wasn't selected")
+
+    args2 = pd.DataFrame({'momentum': 0.9,
                          'learning_rate': 0.05,
                          'nesterov_momentum': True,
                          'decay': 0.0001,
@@ -96,20 +112,27 @@ def main():
                          'log_dir': 'knowledge_distillation/logs/' + current_time
                          }, index=[0])
 
-    optimizer_student_SGD = torch.optim.SGD(
-        student_model.parameters(),
-        args.learning_rate[0],
-        momentum=args.momentum[0],
-        weight_decay=args.decay[0],
-        nesterov=args.nesterov_momentum[0])
-    optimizer_student_ADAM = torch.optim.Adam(
-        student_model.parameters(),
-        args.learning_rate[0],
-        weight_decay=args.decay[0], )
-    print(f'lr = {args.learning_rate[0]}')
+    if args.opt == 'SGD':
+        optimizer_student = torch.optim.SGD(
+            student_model.parameters(),
+            args.lr,
+            momentum=args.momentum,
+            weight_decay=args.weight_decay,
+            nesterov=args.nesterov_momentum)
+    elif args.opt == 'ADAM':
+        optimizer_student = torch.optim.Adam(
+            student_model.parameters(),
+            args.lr,
+            weight_decay=args.weight_decay, )
+    else:
+        raise Exception("error: student optimizer wasn't selected")
 
-    att_object = PGD(student_model, args.student_loss[0], n_iter=10, alpha=0.006)
-    # att_object = None
+    print(f'lr = {args.lr}')
+
+    if args.adv_training:
+        att_object = PGD(student_model, student_loss, n_iter=args.n_iter, alpha=args.alpha)
+    else:
+        att_object = None
 
     # initialize SoftTargetKD object
     soft_target_KD = SoftTargetKD(
@@ -117,17 +140,17 @@ def main():
         student_model=student_model,
         train_loader=train_loader,
         val_loader=test_loader,
-        optimizer_student=optimizer_student_SGD,
-        loss_fn=torch.nn.MSELoss(),
-        temp=args.temperature[0],
-        distil_weight=args.distill_weight[0],
-        device=args.device[0],
+        optimizer_student=optimizer_student,
+        loss_fn=student_loss,
+        temp=args.temperature,
+        distil_weight=args.distill_weight,
+        device=args.device,
         att_object=att_object,
         log=True,
-        logdir=args.log_dir[0]
+        logdir=args.log_dir + current_time
     )
 
-    soft_target_KD.train_student(epochs=100)
+    soft_target_KD.train_student(epochs=args.epochs)
     soft_target_KD.evaluate()
     soft_target_KD.evaluate_teacher()
 
