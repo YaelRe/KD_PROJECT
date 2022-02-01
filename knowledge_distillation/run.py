@@ -117,6 +117,11 @@ def main():
         raise Exception("error: student optimizer wasn't selected")
 
     print(f'lr = {args.lr}')
+    print(f'student_loss = {student_loss}')
+    print(f'student_optimizer = {optimizer_student}')
+    print(f'distill_weight = {args.distill_weight}')
+    print(f'temperature = {args.temperature}')
+    print(f'adv_training = {str(args.adv_training)}')
 
     if args.adv_training:
         att_object = PGD(student_model, student_loss, n_iter=args.n_iter, alpha=args.alpha)
