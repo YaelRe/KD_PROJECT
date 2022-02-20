@@ -11,7 +11,7 @@ def load_teacher_data_from_csv(file_name):
 
 
 class TeacherData:
-    def __init__(self, data_dic, m_forward=8):
+    def __init__(self, data_dic, m_forward=512):
         self.num_classes = 10
         self.m_forward = m_forward
         self.clean_train_outputs = None
