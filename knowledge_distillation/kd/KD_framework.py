@@ -49,6 +49,7 @@ class KDFramework:
         self.att_object = att_object
         self.log = log
         self.logdir = logdir
+        self.adv_w = 0.5
 
         if self.log:
             self.writer_train_student_loss = SummaryWriter(log_dir=logdir+"_train_student_loss")
@@ -117,15 +118,18 @@ class KDFramework:
                 data = data.to(self.device)
                 label = label.to(self.device)
 
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
+                                                                                 image_indices=image_indices.tolist())
+                teacher_out = teacher_out.to(self.device)
+
                 if self.att_object:
                     # ===== Adversarial training ===== #
-                    x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
-                    # data.requires_grad = True
+                    perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
+                    self.student_model.zero_grad()
 
+                    # data.requires_grad = True
                     # x_a.requires_grad = False
-                    # print(torch.eq(data[0], x_a[0]))
                     # student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
-                    student_out = self.student_model(data)
                     # if batch_index == 0:
                     #     print("requires_grad----->" + str(data.requires_grad))
                     #     print("requires_grad----->" + str(x_a.requires_grad))
@@ -134,27 +138,41 @@ class KDFramework:
                     #     print("_grad------>" + str(data._grad))
                     #     print("_grad------>" + str(x_a._grad))
 
+                    self.optimizer_student.zero_grad()
+
+                    student_out = self.student_model(data)
+                    reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                    ((1 - self.adv_w) * reg_loss).backward()
+
+                    student_out_perturb = self.student_model(perturb_data)
+                    perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
+                    (self.adv_w * perturb_loss).backward()
+
+                    self.optimizer_student.step()
+
+                    pred = student_out_perturb.argmax(dim=1, keepdim=True)
+                    correct += pred.eq(label.view_as(pred)).sum().item()
+
+                    # torch.cuda.empty_cache()
+
+                    epoch_loss += perturb_loss.item()
+
                 else:
                     # ===== Regular training ===== #
                     student_out = self.student_model(data)
+                    loss = self.calculate_kd_loss(student_out, teacher_out, label)
 
-                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
-                                                                                 image_indices=image_indices.tolist())
-                teacher_out = teacher_out.to(self.device)
+                    if isinstance(student_out, tuple):
+                        student_out = student_out[0]
 
-                loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                    pred = student_out.argmax(dim=1, keepdim=True)
+                    correct += pred.eq(label.view_as(pred)).sum().item()
 
-                if isinstance(student_out, tuple):
-                    student_out = student_out[0]
+                    self.optimizer_student.zero_grad()
+                    loss.backward()
+                    self.optimizer_student.step()
 
-                pred = student_out.argmax(dim=1, keepdim=True)
-                correct += pred.eq(label.view_as(pred)).sum().item()
-
-                self.optimizer_student.zero_grad()
-                loss.backward()
-                self.optimizer_student.step()
-
-                epoch_loss += loss.item()
+                    epoch_loss += loss.item()
 
             epoch_acc = correct / length_of_dataset
 
