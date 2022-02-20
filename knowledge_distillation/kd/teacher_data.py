@@ -16,8 +16,8 @@ class TeacherData:
         self.m_forward = m_forward
         self.clean_train_outputs = None
         self.clean_test_outputs = None
-        self.perturb_train_outputs = None
-        self.perturb_test_outputs = None
+        self.soft_train_outputs = None
+        self.soft_test_outputs = None
 
         self._read_teacher_outputs(data_dic)
 
@@ -27,17 +27,17 @@ class TeacherData:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
             self.clean_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
-        if data_dic['perturb_train_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/perturb_train_data_output.csv'
-            self.perturb_train_outputs = load_teacher_data_from_csv(csv_file_name)
+        if data_dic['soft_train_data'] is True:
+            csv_file_name = 'knowledge_distillation/teacher_data/soft_train_data_output.csv'
+            self.soft_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['clean_test_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
             self.clean_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
-        if data_dic['perturb_test_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/perturb_test_data_output.csv'
-            self.perturb_test_outputs = load_teacher_data_from_csv(csv_file_name)
+        if data_dic['soft_test_data'] is True:
+            csv_file_name = 'knowledge_distillation/teacher_data/soft_test_data_output.csv'
+            self.soft_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
     def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices: list):
         batch_histogram_outputs = outputs_df.loc[outputs_df['image_indices'].isin(image_indices)]
@@ -55,11 +55,11 @@ class TeacherData:
         df = None
         if mode == 'clean_train':
             df = self.clean_train_outputs
-        if mode == 'perturb_train':
-            df = self.perturb_train_outputs
+        if mode == 'soft_train':
+            df = self.soft_train_outputs
         if mode == 'clean_test':
             df = self.clean_test_outputs
-        if mode == 'perturb_test':
-            df = self.perturb_test_outputs
+        if mode == 'soft_test':
+            df = self.soft_test_outputs
         df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
         return self._generate_prediction_smoothing_outputs(df_batch)

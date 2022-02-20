@@ -1,6 +1,5 @@
 import torchvision
 import torch
-import pandas as pd
 import random
 import datetime
 import argparse
@@ -16,9 +15,9 @@ import knowledge_distillation.kd.teacher_data as td
 
 parser = argparse.ArgumentParser(description='KD Training')
 parser.add_argument('--clean_train_data', default=True, type=bool)
-parser.add_argument('--perturb_train_data', default=False, type=bool)
+parser.add_argument('--soft_train_data', default=False, type=bool)
 parser.add_argument('--clean_test_data', default=True, type=bool)
-parser.add_argument('--perturb_test_data', default=False, type=bool)
+parser.add_argument('--soft_test_data', default=False, type=bool)
 parser.add_argument('--log_dir', '--log-dir', type=str, default='knowledge_distillation/logs/', help='folder to save model and training log')
 parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
@@ -71,7 +70,7 @@ parser.add_argument('--random-start', default=True, type=bool)
 def main():
     args = parser.parse_args()
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    load_student_model = args.load_student_model  # TODO: load it from params file
+    load_student_model = args.load_student_model
     student_model = wideresnet28()
 
     if load_student_model:
@@ -82,8 +81,10 @@ def main():
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
         student_model.load_state_dict(transform_checkpoint(checkpoint))
 
-    teacher_data = td.TeacherData(data_dic={'clean_train_data': args.clean_train_data, 'clean_test_data': args.clean_test_data,
-                                            'perturb_train_data': args.perturb_train_data, 'perturb_test_data': args.perturb_test_data},
+    teacher_data = td.TeacherData(data_dic={'clean_train_data': args.clean_train_data,
+                                            'clean_test_data': args.clean_test_data,
+                                            'soft_train_data': args.soft_train_data,
+                                            'soft_test_data': args.soft_test_data},
                                   m_forward=args.m_forward)
     workers = args.workers
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,
@@ -92,7 +93,6 @@ def main():
                                                val_batch_size=args.batch_size,
                                                workers=workers)
 
-    # 'student_loss': torch.nn.MSELoss(),
     # 'student_loss': F.cross_entropy,
     if args.loss == 'MSE':
         student_loss = torch.nn.MSELoss()
@@ -164,9 +164,5 @@ if __name__ == '__main__':
     main()
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
-
     # torch.set_printoptions(threshold=10_000)
-    # teacher_data1 = td.TeacherData(data_dic={'clean_data': True, 'perturb_data': False}, m_forward=512)
-    # temp_image_indices = list(range(255))
-    # batch_teacher_out = teacher_data1.get_predictions_by_image_indices(mode='clean', image_indices=temp_image_indices)
-    # print(batch_teacher_out)
+

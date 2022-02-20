@@ -138,7 +138,6 @@ class KDFramework:
                     # ===== Regular training ===== #
                     student_out = self.student_model(data)
 
-                # TODO: understand what to do about clean vs perturb data
                 teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
@@ -283,7 +282,6 @@ class KDFramework:
                 output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
                                                                             image_indices=image_indices.tolist())
                 output = output.to(self.device)
-                # output = model(data)
 
                 if isinstance(output, tuple):
                     output = output[0]
@@ -297,7 +295,6 @@ class KDFramework:
         if verbose:
             print("-" * 80)
             print("Teacher Validation Accuracy: {}".format(accuracy))
-            # Teacher Validation Accuracy: 0.8868
         return outputs, accuracy
 
     def get_parameters(self):
@@ -318,16 +315,3 @@ class KDFramework:
 
         pass
 
-    # TODO: Create a plot of the training and testing loss and accuracy using the event log created with self.writer
-    # https://stackoverflow.com/questions/36700404/tensorflow-opening-log-data-written-by-summarywriter
-    # https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html
-    def plot_results(self):
-        # from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-        # event_acc = EventAccumulator('/path/to/summary/folder')
-        # event_acc.Reload()
-        # # Show all tags in the log file
-        # print(event_acc.Tags())
-        #
-        # # E. g. get wall clock, number of steps and value for a scalar 'Accuracy'
-        # w_times, step_nums, vals = zip(*event_acc.Scalars('Accuracy'))
-        pass
