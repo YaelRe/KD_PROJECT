@@ -141,7 +141,7 @@ class KDFramework:
 
                     student_out = self.student_model(data)
                     reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
-                    print(f'reg loss: {reg_loss}')
+                    print(f'reg loss: {type(reg_loss)}')
                     ((1 - self.adv_w) * reg_loss).backward()
 
                     student_out_perturb = self.student_model(perturb_data)
@@ -161,7 +161,7 @@ class KDFramework:
                     # ===== Regular training ===== #
                     student_out = self.student_model(data)
                     loss = self.calculate_kd_loss(student_out, teacher_out, label)
-                    print(f'loss: {loss}')
+                    print(f'loss: {type(loss)}')
                     if isinstance(student_out, tuple):
                         student_out = student_out[0]
 
