@@ -124,6 +124,8 @@ class KDFramework:
                 if self.att_object:
                     # ===== Adversarial training ===== #
                     perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
+                    for param in self.student_model.parameters():
+                        param.requires_grad = True
                     # self.student_model.zero_grad()
 
                     # data.requires_grad = True
@@ -141,8 +143,7 @@ class KDFramework:
 
                     student_out = self.student_model(data)
                     reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
-                    print(f'reg loss: {type(reg_loss)}')
-                    reg_loss.backward()
+                    ((1 - self.adv_w) * reg_loss).backward()
 
                     student_out_perturb = self.student_model(perturb_data)
                     perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
@@ -161,7 +162,7 @@ class KDFramework:
                     # ===== Regular training ===== #
                     student_out = self.student_model(data)
                     loss = self.calculate_kd_loss(student_out, teacher_out, label)
-                    print(f'loss: {type(loss)}')
+
                     if isinstance(student_out, tuple):
                         student_out = student_out[0]
 
