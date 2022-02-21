@@ -24,7 +24,7 @@ class TeacherData:
     def _read_teacher_outputs(self, data_dic):
         # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
         if data_dic['clean_train_data'] is True:
-            csv_file_name = './teacher_data/clean_train_data_output.csv'
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
             self.clean_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['soft_train_data'] is True:
@@ -32,7 +32,7 @@ class TeacherData:
             self.soft_train_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['clean_test_data'] is True:
-            csv_file_name = './teacher_data/clean_test_data_output.csv'
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
             self.clean_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['soft_test_data'] is True:
