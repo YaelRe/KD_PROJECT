@@ -141,6 +141,7 @@ class KDFramework:
 
                     student_out = self.student_model(data)
                     reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                    print(f'reg loss: {reg_loss}')
                     ((1 - self.adv_w) * reg_loss).backward()
 
                     student_out_perturb = self.student_model(perturb_data)
