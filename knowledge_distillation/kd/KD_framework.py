@@ -161,7 +161,7 @@ class KDFramework:
                     # ===== Regular training ===== #
                     student_out = self.student_model(data)
                     loss = self.calculate_kd_loss(student_out, teacher_out, label)
-
+                    print(f'loss: {loss}')
                     if isinstance(student_out, tuple):
                         student_out = student_out[0]
 
