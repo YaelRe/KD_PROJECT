@@ -84,7 +84,6 @@ class KDFramework:
     def _train_student(
             self,
             epochs=10,
-            plot_losses=True,
             save_model=True,
             save_model_pth="knowledge_distillation/kd_models/student.pt",
     ):
@@ -98,7 +97,7 @@ class KDFramework:
 
         self.student_model.train()
         loss_arr = []
-        length_of_dataset = len(self.train_loader.dataset)  # TODO: make sure that 50000 is ok..
+        length_of_dataset = len(self.train_loader.dataset)
         best_acc = 0.0
         self.best_student_model_weights = deepcopy(self.student_model.state_dict())
 
@@ -208,7 +207,6 @@ class KDFramework:
     def train_student(
             self,
             epochs=10,
-            plot_losses=True,
             save_model=True,
             save_model_pth="./models/student.pt",
     ):
@@ -219,7 +217,7 @@ class KDFramework:
         :param save_model (bool): True if you want to save the student model
         :param save_model_pth (str): Path where you want to save the student model
         """
-        self._train_student(epochs, plot_losses, save_model, save_model_pth)
+        self._train_student(epochs, save_model, save_model_pth)
 
     def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true):
         """
