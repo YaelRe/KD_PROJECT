@@ -124,7 +124,7 @@ class KDFramework:
                 if self.att_object:
                     # ===== Adversarial training ===== #
                     perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
-                    self.student_model.zero_grad()
+                    # self.student_model.zero_grad()
 
                     # data.requires_grad = True
                     # x_a.requires_grad = False
