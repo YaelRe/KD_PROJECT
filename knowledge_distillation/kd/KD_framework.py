@@ -56,6 +56,9 @@ class KDFramework:
             self.writer_train_student_acc = SummaryWriter(log_dir=logdir+"_train_student_acc")
             self.writer_val_student_acc = SummaryWriter(log_dir=logdir+"_val_student_acc")
             self.writer_val_student_teacher_acc = SummaryWriter(log_dir=logdir+"_val_student_teacher_acc")
+            if self.att_object:
+                self.writer_perturb_train_student_loss = SummaryWriter(log_dir=logdir + "_perturb_train_student_loss")
+                self.writer_perturb_train_student_acc = SummaryWriter(log_dir=logdir + "_perturb_train_student_acc")
 
         if device == "cpu":
             print('device == cpu')
@@ -181,7 +184,6 @@ class KDFramework:
         """
 
         self.student_model.train()
-        loss_arr = []
         length_of_dataset = len(self.train_loader.dataset)
         best_acc = 0.0
         self.best_student_model_weights = deepcopy(self.student_model.state_dict())
@@ -194,7 +196,9 @@ class KDFramework:
 
         for ep in range(epochs):
             epoch_loss = 0.0
+            epoch_perturb_loss = 0.0
             correct = 0
+            perturb_correct = 0
 
             for batch_index, (data, label, image_indices) in enumerate(tqdm(self.train_loader)):
 
@@ -205,51 +209,37 @@ class KDFramework:
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
-                if self.att_object:
-                    # ===== Adversarial training ===== #
-                    perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
-                    for param in self.student_model.parameters():
-                        param.requires_grad = True
+                perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
+                for param in self.student_model.parameters():
+                    param.requires_grad = True
 
-                    self.student_model.zero_grad()
+                self.student_model.zero_grad()
 
-                    self.optimizer_student.zero_grad()
+                self.optimizer_student.zero_grad()
 
-                    student_out = self.student_model(data)
-                    reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
-                    ((1 - self.adv_w) * reg_loss).backward()
+                student_out = self.student_model(data)
+                reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                ((1 - self.adv_w) * reg_loss).backward()
 
-                    student_out_perturb = self.student_model(perturb_data)
-                    perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
-                    (self.adv_w * perturb_loss).backward()
+                student_out_perturb = self.student_model(perturb_data)
+                perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
+                (self.adv_w * perturb_loss).backward()
 
-                    self.optimizer_student.step()
+                self.optimizer_student.step()
 
-                    pred = student_out_perturb.argmax(dim=1, keepdim=True)
-                    correct += pred.eq(label.view_as(pred)).sum().item()
+                pred = student_out.argmax(dim=1, keepdim=True)
+                correct += pred.eq(label.view_as(pred)).sum().item()
 
-                    # torch.cuda.empty_cache()
+                perturb_pred = student_out_perturb.argmax(dim=1, keepdim=True)
+                perturb_correct += perturb_pred.eq(label.view_as(perturb_pred)).sum().item()
 
-                    epoch_loss += perturb_loss.item()
+                # torch.cuda.empty_cache()
 
-                else:
-                    # ===== Regular training ===== #
-                    student_out = self.student_model(data)
-                    loss = self.calculate_kd_loss(student_out, teacher_out, label)
-
-                    if isinstance(student_out, tuple):
-                        student_out = student_out[0]
-
-                    pred = student_out.argmax(dim=1, keepdim=True)
-                    correct += pred.eq(label.view_as(pred)).sum().item()
-
-                    self.optimizer_student.zero_grad()
-                    loss.backward()
-                    self.optimizer_student.step()
-
-                    epoch_loss += loss.item()
+                epoch_loss += reg_loss.item()
+                epoch_perturb_loss += perturb_loss.item()
 
             epoch_acc = correct / length_of_dataset
+            epoch_perturb_acc = perturb_correct / length_of_dataset
 
             _, epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
 
@@ -260,21 +250,24 @@ class KDFramework:
                 )
             if self.log:
                 self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
+                self.writer_perturb_train_student_loss.add_scalar("Training perturb loss/Student", epoch_perturb_loss, ep)
                 self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
+                self.writer_perturb_train_student_acc.add_scalar("Training accuracy/Student", epoch_perturb_acc, ep)
                 self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
                 self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
 
-            loss_arr.append(epoch_loss)
             print(
-                "Epoch: {}, Loss: {}, Accuracy: {}".format(
-                    ep + 1, epoch_loss, epoch_acc
+                "Epoch: {}, Loss: {}, Loss_perturb: {}, Accuracy: {}, Accuracy_perturb: {}".format(
+                    ep + 1, epoch_loss, epoch_perturb_loss, epoch_acc, epoch_perturb_acc
                 )
             )
 
         if self.log:
             self.writer_train_student_loss.close()
+            self.writer_perturb_train_student_loss.close()
             self.writer_train_student_acc.close()
             self.writer_val_student_acc.close()
+            self.writer_perturb_train_student_acc.close()
             self.writer_val_student_teacher_acc.close()
         self.student_model.load_state_dict(self.best_student_model_weights)
         if save_model:
@@ -293,7 +286,10 @@ class KDFramework:
         :param save_model (bool): True if you want to save the student model
         :param save_model_pth (str): Path where you want to save the student model
         """
-        self._train_student(epochs, save_model, save_model_pth)
+        if self.att_object:
+            self._adv_train_student(epochs, save_model, save_model_pth)
+        else:
+            self._train_student(epochs, save_model, save_model_pth)
 
     def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true):
         """
