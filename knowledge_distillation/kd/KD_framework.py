@@ -59,6 +59,7 @@ class KDFramework:
             if self.att_object:
                 self.writer_perturb_train_student_loss = SummaryWriter(log_dir=logdir + "_perturb_train_student_loss")
                 self.writer_perturb_train_student_acc = SummaryWriter(log_dir=logdir + "_perturb_train_student_acc")
+                self.writer_perturb_val_student_acc = SummaryWriter(log_dir=logdir + "_perturb_val_student_acc")
 
         if device == "cpu":
             print('device == cpu')
@@ -140,7 +141,7 @@ class KDFramework:
 
             epoch_acc = correct / length_of_dataset
 
-            _, epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
+            epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
 
             if epoch_val_acc > best_acc:
                 best_acc = epoch_val_acc
@@ -241,7 +242,7 @@ class KDFramework:
             epoch_acc = correct / length_of_dataset
             epoch_perturb_acc = perturb_correct / length_of_dataset
 
-            _, epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
+            epoch_val_acc, epoch_perturb_val_acc, epoch_val_teacher_acc = self._adv_evaluate_model(self.student_model, verbose=True)
 
             if epoch_val_acc > best_acc:
                 best_acc = epoch_val_acc
@@ -254,6 +255,7 @@ class KDFramework:
                 self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
                 self.writer_perturb_train_student_acc.add_scalar("Training accuracy/Student", epoch_perturb_acc, ep)
                 self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
+                self.writer_perturb_val_student_acc.add_scalar("Validation perturb accuracy/Student", epoch_perturb_val_acc, ep)
                 self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
 
             print(
@@ -312,7 +314,6 @@ class KDFramework:
         length_of_dataset = len(self.val_loader.dataset)
         correct = 0
         student_teacher_correct = 0
-        outputs = []
 
         with torch.no_grad():
             for data, target, image_indices in self.val_loader:
@@ -325,7 +326,6 @@ class KDFramework:
                 teacher_output = teacher_output.to(self.device)
                 if isinstance(student_output, tuple):
                     student_output = student_output[0]
-                outputs.append(student_output)
 
                 student_pred = student_output.argmax(dim=1, keepdim=True)
                 correct += student_pred.eq(target.view_as(student_pred)).sum().item()
@@ -340,7 +340,56 @@ class KDFramework:
             print("-" * 80)
             print("Validation Accuracy: {}".format(accuracy))
             print("Student Teacher Validation Accuracy: {}".format(student_teacher_accuracy))
-        return outputs, accuracy, student_teacher_accuracy
+        return accuracy, student_teacher_accuracy
+
+    def _adv_evaluate_model(self, model, verbose=True):
+        """
+        Evaluate the given model's accuaracy over val set.
+        For internal use only.
+        :param model (nn.Module): Model to be used for evaluation
+        :param verbose (bool): Display Accuracy
+        """
+        model.eval()
+        length_of_dataset = len(self.val_loader.dataset)
+        correct = 0
+        perturb_correct = 0
+        student_teacher_correct = 0
+
+        with torch.no_grad():
+            for data, target, image_indices in self.val_loader:
+                data = data.to(self.device)
+                target = target.to(self.device)
+
+                perturb_data, _, _, _ = self.att_object.perturb(data, target, eps=8 / 255)
+
+                student_output = model(data)
+                student_perturb_output = model(perturb_data)
+
+                teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='test',
+                                                                                    image_indices=image_indices.tolist())
+                teacher_output = teacher_output.to(self.device)
+                if isinstance(student_output, tuple):
+                    student_output = student_output[0]
+
+                student_pred = student_output.argmax(dim=1, keepdim=True)
+                correct += student_pred.eq(target.view_as(student_pred)).sum().item()
+
+                student_perturb_pred = student_perturb_output.argmax(dim=1, keepdim=True)
+                perturb_correct += student_perturb_pred.eq(target.view_as(student_perturb_pred)).sum().item()
+
+                teacher_pred = teacher_output.argmax(dim=1, keepdim=True)
+                student_teacher_correct += student_pred.eq(teacher_pred.view_as(student_pred)).sum().item()
+
+        accuracy = correct / length_of_dataset
+        perturb_accuracy = perturb_correct / length_of_dataset
+        student_teacher_accuracy = student_teacher_correct / length_of_dataset
+
+        if verbose:
+            print("-" * 80)
+            print("Validation Accuracy: {}".format(accuracy))
+            print("Validation Perturb Accuracy: {}".format(perturb_accuracy))
+            print("Student Teacher Validation Accuracy: {}".format(student_teacher_accuracy))
+        return accuracy, perturb_accuracy, student_teacher_accuracy
 
     def evaluate(self):
         """
@@ -349,7 +398,7 @@ class KDFramework:
         """
 
         model = deepcopy(self.student_model).to(self.device)
-        _, accuracy, _ = self._evaluate_model(model)
+        accuracy, _ = self._evaluate_model(model)
 
         return accuracy
 
