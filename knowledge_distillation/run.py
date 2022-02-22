@@ -165,4 +165,3 @@ if __name__ == '__main__':
 
     # student_model = torch.load('./results/student.pt', map_location=torch.device('cpu'))
     # torch.set_printoptions(threshold=10_000)
-

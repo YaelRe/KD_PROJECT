@@ -49,6 +49,7 @@ class KDFramework:
         self.att_object = att_object
         self.log = log
         self.logdir = logdir
+        self.adv_w = 0.5
 
         if self.log:
             self.writer_train_student_loss = SummaryWriter(log_dir=logdir+"_train_student_loss")
@@ -83,7 +84,6 @@ class KDFramework:
     def _train_student(
             self,
             epochs=10,
-            plot_losses=True,
             save_model=True,
             save_model_pth="knowledge_distillation/kd_models/student.pt",
     ):
@@ -97,7 +97,7 @@ class KDFramework:
 
         self.student_model.train()
         loss_arr = []
-        length_of_dataset = len(self.train_loader.dataset)  # TODO: make sure that 50000 is ok..
+        length_of_dataset = len(self.train_loader.dataset)
         best_acc = 0.0
         self.best_student_model_weights = deepcopy(self.student_model.state_dict())
 
@@ -111,50 +111,58 @@ class KDFramework:
             epoch_loss = 0.0
             correct = 0
 
-            # TODO: add perturbation to data.....
             for batch_index, (data, label, image_indices) in enumerate(tqdm(self.train_loader)):
 
                 data = data.to(self.device)
                 label = label.to(self.device)
 
-                if self.att_object:
-                    # ===== Adversarial training ===== #
-                    x_a, output, student_out, _ = self.att_object.perturb(data, label, eps=8/255)
-                    # data.requires_grad = True
-
-                    # x_a.requires_grad = False
-                    # print(torch.eq(data[0], x_a[0]))
-                    # student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
-                    student_out = self.student_model(data)
-                    # if batch_index == 0:
-                    #     print("requires_grad----->" + str(data.requires_grad))
-                    #     print("requires_grad----->" + str(x_a.requires_grad))
-                    #     print("_backward_hooks --------->" +str( data._backward_hooks))
-                    #     print("_backward_hooks --------->" + str(x_a._backward_hooks))
-                    #     print("_grad------>" + str(data._grad))
-                    #     print("_grad------>" + str(x_a._grad))
-
-                else:
-                    # ===== Regular training ===== #
-                    student_out = self.student_model(data)
-
                 teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
-                loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                if self.att_object:
+                    # ===== Adversarial training ===== #
+                    perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
+                    for param in self.student_model.parameters():
+                        param.requires_grad = True
 
-                if isinstance(student_out, tuple):
-                    student_out = student_out[0]
+                    self.student_model.zero_grad()
 
-                pred = student_out.argmax(dim=1, keepdim=True)
-                correct += pred.eq(label.view_as(pred)).sum().item()
+                    self.optimizer_student.zero_grad()
 
-                self.optimizer_student.zero_grad()
-                loss.backward()
-                self.optimizer_student.step()
+                    student_out = self.student_model(data)
+                    reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                    ((1 - self.adv_w) * reg_loss).backward()
 
-                epoch_loss += loss.item()
+                    student_out_perturb = self.student_model(perturb_data)
+                    perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
+                    (self.adv_w * perturb_loss).backward()
+
+                    self.optimizer_student.step()
+
+                    pred = student_out_perturb.argmax(dim=1, keepdim=True)
+                    correct += pred.eq(label.view_as(pred)).sum().item()
+
+                    # torch.cuda.empty_cache()
+
+                    epoch_loss += perturb_loss.item()
+
+                else:
+                    # ===== Regular training ===== #
+                    student_out = self.student_model(data)
+                    loss = self.calculate_kd_loss(student_out, teacher_out, label)
+
+                    if isinstance(student_out, tuple):
+                        student_out = student_out[0]
+
+                    pred = student_out.argmax(dim=1, keepdim=True)
+                    correct += pred.eq(label.view_as(pred)).sum().item()
+
+                    self.optimizer_student.zero_grad()
+                    loss.backward()
+                    self.optimizer_student.step()
+
+                    epoch_loss += loss.item()
 
             epoch_acc = correct / length_of_dataset
 
@@ -190,7 +198,6 @@ class KDFramework:
     def train_student(
             self,
             epochs=10,
-            plot_losses=True,
             save_model=True,
             save_model_pth="./models/student.pt",
     ):
@@ -201,7 +208,7 @@ class KDFramework:
         :param save_model (bool): True if you want to save the student model
         :param save_model_pth (str): Path where you want to save the student model
         """
-        self._train_student(epochs, plot_losses, save_model, save_model_pth)
+        self._train_student(epochs, save_model, save_model_pth)
 
     def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true):
         """
