@@ -120,6 +120,91 @@ class KDFramework:
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
+                student_out = self.student_model(data)
+                loss = self.calculate_kd_loss(student_out, teacher_out, label)
+
+                if isinstance(student_out, tuple):
+                    student_out = student_out[0]
+
+                pred = student_out.argmax(dim=1, keepdim=True)
+                correct += pred.eq(label.view_as(pred)).sum().item()
+
+                self.optimizer_student.zero_grad()
+                loss.backward()
+                self.optimizer_student.step()
+
+                epoch_loss += loss.item()
+
+            epoch_acc = correct / length_of_dataset
+
+            _, epoch_val_acc, epoch_val_teacher_acc = self._evaluate_model(self.student_model, verbose=True)
+
+            if epoch_val_acc > best_acc:
+                best_acc = epoch_val_acc
+                self.best_student_model_weights = deepcopy(
+                    self.student_model.state_dict()
+                )
+            if self.log:
+                self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
+                self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
+                self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
+                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
+
+            loss_arr.append(epoch_loss)
+            print(
+                "Epoch: {}, Loss: {}, Accuracy: {}".format(
+                    ep + 1, epoch_loss, epoch_acc
+                )
+            )
+
+        if self.log:
+            self.writer_train_student_loss.close()
+            self.writer_train_student_acc.close()
+            self.writer_val_student_acc.close()
+            self.writer_val_student_teacher_acc.close()
+        self.student_model.load_state_dict(self.best_student_model_weights)
+        if save_model:
+            torch.save(self.student_model.state_dict(), save_model_pth)
+
+    def _adv_train_student(
+            self,
+            epochs=10,
+            save_model=True,
+            save_model_pth="knowledge_distillation/kd_models/student.pt",
+    ):
+        """
+        Function to train student model - for internal use only.
+        :param epochs (int): Number of epochs you want to train the teacher
+        :param plot_losses (bool): True if you want to plot the losses
+        :param save_model (bool): True if you want to save the student model
+        :param save_model_pth (str): Path where you want to save the student model
+        """
+
+        self.student_model.train()
+        loss_arr = []
+        length_of_dataset = len(self.train_loader.dataset)
+        best_acc = 0.0
+        self.best_student_model_weights = deepcopy(self.student_model.state_dict())
+
+        save_dir = os.path.dirname(save_model_pth)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        print("Training Student...")
+
+        for ep in range(epochs):
+            epoch_loss = 0.0
+            correct = 0
+
+            for batch_index, (data, label, image_indices) in enumerate(tqdm(self.train_loader)):
+
+                data = data.to(self.device)
+                label = label.to(self.device)
+
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
+                                                                                 image_indices=image_indices.tolist())
+                teacher_out = teacher_out.to(self.device)
+
                 if self.att_object:
                     # ===== Adversarial training ===== #
                     perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
