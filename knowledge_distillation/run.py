@@ -144,7 +144,9 @@ def main():
         logdir='knowledge_distillation/logs/' + current_time
     )
 
-    soft_target_KD.train_student(epochs=args.epochs)
+    soft_target_KD.train_student(epochs=args.epochs,
+                                 save_model=True,
+                                 save_model_pth=f"knowledge_distillation/kd_models/student_{current_time}.pt")
     soft_target_KD.evaluate()
     soft_target_KD.evaluate_teacher()
 
