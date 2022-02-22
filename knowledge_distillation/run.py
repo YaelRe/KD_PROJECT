@@ -14,10 +14,8 @@ from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import knowledge_distillation.kd.teacher_data as td
 
 parser = argparse.ArgumentParser(description='KD Training')
-parser.add_argument('--clean_train_data', default=True, type=bool)
-parser.add_argument('--soft_train_data', default=False, type=bool)
-parser.add_argument('--clean_test_data', default=True, type=bool)
-parser.add_argument('--soft_test_data', default=False, type=bool)
+parser.add_argument('--hist_data', default=False, type=bool)
+parser.add_argument('--soft_data', default=False, type=bool)
 parser.add_argument('--log_dir', '--log-dir', type=str, default='knowledge_distillation/logs/', help='folder to save model and training log')
 parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
@@ -81,10 +79,8 @@ def main():
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
         student_model.load_state_dict(transform_checkpoint(checkpoint))
 
-    teacher_data = td.TeacherData(data_dic={'clean_train_data': args.clean_train_data,
-                                            'clean_test_data': args.clean_test_data,
-                                            'soft_train_data': args.soft_train_data,
-                                            'soft_test_data': args.soft_test_data},
+    teacher_data = td.TeacherData(data_dic={'hist_data': args.hist_data,
+                                            'soft_data': args.soft_data},
                                   m_forward=args.m_forward)
     workers = args.workers
     train_loader, test_loader, _ = get_loaders(dataset=torchvision.datasets.CIFAR10,

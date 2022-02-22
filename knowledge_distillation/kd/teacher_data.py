@@ -23,20 +23,16 @@ class TeacherData:
 
     def _read_teacher_outputs(self, data_dic):
         # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
-        if data_dic['clean_train_data'] is True:
+        if data_dic['hist_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
             self.clean_train_outputs = load_teacher_data_from_csv(csv_file_name)
-
-        if data_dic['soft_train_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/soft_train_data_output.csv'
-            self.soft_train_outputs = load_teacher_data_from_csv(csv_file_name)
-
-        if data_dic['clean_test_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
             self.clean_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
-        if data_dic['soft_test_data'] is True:
-            csv_file_name = 'knowledge_distillation/teacher_data/soft_test_data_output.csv'
+        if data_dic['soft_data'] is True:
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_train_soft_data_output.csv'
+            self.soft_train_outputs = load_teacher_data_from_csv(csv_file_name)
+            csv_file_name = 'knowledge_distillation/teacher_data/clean_test_soft_data_output.csv'
             self.soft_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
     def _get_teacher_output_by_image_indices(self, outputs_df: pd.DataFrame, image_indices: list):
@@ -53,13 +49,21 @@ class TeacherData:
 
     def get_predictions_by_image_indices(self, mode: str, image_indices: list):
         df = None
-        if mode == 'clean_train':
-            df = self.clean_train_outputs
-        if mode == 'soft_train':
-            df = self.soft_train_outputs
-        if mode == 'clean_test':
-            df = self.clean_test_outputs
-        if mode == 'soft_test':
-            df = self.soft_test_outputs
-        df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
-        return self._generate_prediction_smoothing_outputs(df_batch)
+
+        if self.clean_train_outputs is not None:
+            if mode == 'train':
+                df = self.clean_train_outputs
+            if mode == 'test':
+                df = self.clean_test_outputs
+
+            df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
+            return self._generate_prediction_smoothing_outputs(df_batch)
+
+        else:
+            if mode == 'train':
+                df = self.soft_train_outputs
+            if mode == 'test':
+                df = self.soft_test_outputs
+
+            return self._get_teacher_output_by_image_indices(df, image_indices)
+

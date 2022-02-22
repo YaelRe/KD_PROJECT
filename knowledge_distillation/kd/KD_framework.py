@@ -119,7 +119,7 @@ class KDFramework:
                 data = data.to(self.device)
                 label = label.to(self.device)
 
-                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='train',
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
@@ -205,7 +205,7 @@ class KDFramework:
                 data = data.to(self.device)
                 label = label.to(self.device)
 
-                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='clean_train',
+                teacher_out = self.teacher_data.get_predictions_by_image_indices(mode='train',
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
@@ -320,7 +320,7 @@ class KDFramework:
                 target = target.to(self.device)
                 student_output = model(data)
 
-                teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
+                teacher_output = self.teacher_data.get_predictions_by_image_indices(mode='test',
                                                                                     image_indices=image_indices.tolist())
                 teacher_output = teacher_output.to(self.device)
                 if isinstance(student_output, tuple):
@@ -367,7 +367,7 @@ class KDFramework:
         with torch.no_grad():
             for _, target, image_indices in self.val_loader:
                 target = target.to(self.device)
-                output = self.teacher_data.get_predictions_by_image_indices(mode='clean_test',
+                output = self.teacher_data.get_predictions_by_image_indices(mode='test',
                                                                             image_indices=image_indices.tolist())
                 output = output.to(self.device)
 
