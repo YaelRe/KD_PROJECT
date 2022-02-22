@@ -111,7 +111,6 @@ class KDFramework:
             epoch_loss = 0.0
             correct = 0
 
-            # TODO: add perturbation to data.....
             for batch_index, (data, label, image_indices) in enumerate(tqdm(self.train_loader)):
 
                 data = data.to(self.device)
