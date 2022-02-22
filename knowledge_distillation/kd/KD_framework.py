@@ -126,18 +126,8 @@ class KDFramework:
                     perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
                     for param in self.student_model.parameters():
                         param.requires_grad = True
-                    # self.student_model.zero_grad()
 
-                    # data.requires_grad = True
-                    # x_a.requires_grad = False
-                    # student_out = self.student_model(x_a)# TODO: maybe not necessary and we can use the output_a
-                    # if batch_index == 0:
-                    #     print("requires_grad----->" + str(data.requires_grad))
-                    #     print("requires_grad----->" + str(x_a.requires_grad))
-                    #     print("_backward_hooks --------->" +str( data._backward_hooks))
-                    #     print("_backward_hooks --------->" + str(x_a._backward_hooks))
-                    #     print("_grad------>" + str(data._grad))
-                    #     print("_grad------>" + str(x_a._grad))
+                    self.student_model.zero_grad()
 
                     self.optimizer_student.zero_grad()
 
