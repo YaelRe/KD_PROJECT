@@ -193,7 +193,7 @@ class KDFramework:
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        print("Training Student...")
+        print("Adversarial training Student...")
 
         for ep in range(epochs):
             epoch_loss = 0.0
@@ -215,7 +215,6 @@ class KDFramework:
                     param.requires_grad = True
 
                 self.student_model.zero_grad()
-
                 self.optimizer_student.zero_grad()
 
                 student_out = self.student_model(data)
@@ -355,13 +354,13 @@ class KDFramework:
         perturb_correct = 0
         student_teacher_correct = 0
 
-        with torch.no_grad():
-            for data, target, image_indices in self.val_loader:
-                data = data.to(self.device)
-                target = target.to(self.device)
+        for data, target, image_indices in self.val_loader:
+            data = data.to(self.device)
+            target = target.to(self.device)
 
-                perturb_data, _, _, _ = self.att_object.perturb(data, target, eps=8 / 255)
+            perturb_data, _, _, _ = self.att_object.perturb(data, target, eps=8 / 255)
 
+            with torch.no_grad():
                 student_output = model(data)
                 student_perturb_output = model(perturb_data)
 
