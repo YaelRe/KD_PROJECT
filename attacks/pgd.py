@@ -36,7 +36,8 @@ class PGD(Attack):
             predict_y = True
             y = self.model.predict(x)
         a_abs = np.abs(eps / self.n_iter) if self.alpha is None else np.abs(self.alpha)
-        multiplier = 1 if targeted else -1
+        multiplier = 1
+        # multiplier = 1 if targeted else -1
 
         best_ps = torch.ones_like(y).to(x)
         best_pert = torch.zeros_like(x)
@@ -66,7 +67,7 @@ class PGD(Attack):
                 improve = pi < best_ps
                 best_pert[improve] = pert[improve]
                 best_ps[improve] = pi[improve]
-                best_ps[succ] = 0.
+                # best_ps[succ] = 0.
 
                 loss = multiplier * self.criterion(oi, y)
                 grad = torch.autograd.grad(loss, [pert])[0].detach()
@@ -91,7 +92,7 @@ class PGD(Attack):
                 improve = pi < best_ps
                 best_pert[improve] = pert[improve]
                 best_ps[improve] = pi[improve]
-                best_ps[succ] = 0.
+                # best_ps[succ] = 0.
 
         x_a = x + best_pert
         x_a.detach()
