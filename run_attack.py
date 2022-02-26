@@ -238,8 +238,8 @@ def init_hyper_params(args, add_args, noise, m_forward, logger, device, dtype, r
             except:
                 pass
 
-    # return model, val_loader, criterion  # Change to val_loader adina yael
-    return model, train_loader, criterion
+    return model, val_loader, criterion  # Change to val_loader adina yael
+    # return model, train_loader, criterion
 
 
 def resume_model(args, model, resume_path, optimizer, logger, device):
