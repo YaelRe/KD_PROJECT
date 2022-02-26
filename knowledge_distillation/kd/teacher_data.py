@@ -14,8 +14,8 @@ class TeacherData:
     def __init__(self, data_dic, m_forward=512):
         self.num_classes = 10
         self.m_forward = m_forward
-        self.clean_train_outputs = None
-        self.clean_test_outputs = None
+        self.hist_train_outputs = None
+        self.hist_test_outputs = None
         self.soft_train_outputs = None
         self.soft_test_outputs = None
 
@@ -25,9 +25,9 @@ class TeacherData:
         # in local: ./teacher_data... in server: 'knowledge_distillation/teacher_data/...
         if data_dic['hist_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_train_data_output.csv'
-            self.clean_train_outputs = load_teacher_data_from_csv(csv_file_name)
+            self.hist_train_outputs = load_teacher_data_from_csv(csv_file_name)
             csv_file_name = 'knowledge_distillation/teacher_data/clean_test_data_output.csv'
-            self.clean_test_outputs = load_teacher_data_from_csv(csv_file_name)
+            self.hist_test_outputs = load_teacher_data_from_csv(csv_file_name)
 
         if data_dic['soft_data'] is True:
             csv_file_name = 'knowledge_distillation/teacher_data/clean_train_soft_data_output.csv'
@@ -50,11 +50,11 @@ class TeacherData:
     def get_predictions_by_image_indices(self, mode: str, image_indices: list):
         df = None
 
-        if self.clean_train_outputs is not None:
+        if self.hist_train_outputs is not None:
             if mode == 'train':
-                df = self.clean_train_outputs
+                df = self.hist_train_outputs
             if mode == 'test':
-                df = self.clean_test_outputs
+                df = self.hist_test_outputs
 
             df_batch = self._get_teacher_output_by_image_indices(df, image_indices)
             return self._generate_prediction_smoothing_outputs(df_batch)

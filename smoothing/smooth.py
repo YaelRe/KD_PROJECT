@@ -49,10 +49,10 @@ class Smooth:
 
     def predict(self, x, output, maxk, calc_prob=False, save_data_mode=None, batch_idx=None, image_indices=None):
         _, pred = output.topk(maxk, 1, True, True)
-        outputs, hist, predict = self.monte_carlo_predict(x, maxk, pred)
+        outputs, teacher_output, predict = self.monte_carlo_predict(x, maxk, pred)
 
         if save_data_mode is not None:
-            cpu_hist = hist.detach().cpu().numpy()
+            cpu_hist = teacher_output.detach().cpu().numpy()
             df = pd.DataFrame(cpu_hist)
             df['batch_number'] = batch_idx
             df['image_indices'] = image_indices
@@ -63,7 +63,7 @@ class Smooth:
         pred_prob = -1
         pred_prob_var = -1
         if calc_prob:
-            pred_prob = self.calc_pred_prob(x, predict, outputs, hist)
+            pred_prob = self.calc_pred_prob(x, predict, outputs, teacher_output)
             pred_prob_var = pred_prob * (1 - pred_prob)
 
         return predict, pred_prob, pred_prob_var
@@ -120,8 +120,8 @@ class Smooth:
         output_list = [output_i.unsqueeze(dim=0).to(x) for output_i in outputs]
         outs = torch.cat(output_list)
         output = outs.mean(dim=0)
-        teacher_pred, predictions = output.topk(maxk, 1, True, True)
-        return outputs, teacher_pred, predictions
+        _, predictions = output.topk(maxk, 1, True, True)
+        return outputs, output, predictions
 
     def base_model_predict(self, x, maxk, pred):
         return pred
