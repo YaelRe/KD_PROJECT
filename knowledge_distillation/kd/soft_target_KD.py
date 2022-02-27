@@ -31,7 +31,8 @@ class SoftTargetKD(KDFramework):
         optimizer_student,
         loss_fn=nn.MSELoss(),
         temp=20.0,
-        distil_weight=0.5,
+        distill_weight=0.5,
+        perturb_distill_weight=0.5,
         device="cpu",
         att_object=None,
         log=False,
@@ -45,14 +46,15 @@ class SoftTargetKD(KDFramework):
             optimizer_student,
             loss_fn,
             temp,
-            distil_weight,
+            distill_weight,
+            perturb_distill_weight,
             device,
             att_object,
             log,
             logdir,
         )
 
-    def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true):
+    def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true, distil_weight):
         """
         Function used for calculating the KD loss during distillation
         :param y_pred_student (torch.FloatTensor): Prediction made by the student model
@@ -63,8 +65,8 @@ class SoftTargetKD(KDFramework):
         soft_teacher_out = F.softmax(y_pred_teacher / self.temp, dim=1)
         soft_student_out = F.softmax(y_pred_student / self.temp, dim=1)
 
-        loss = (1 - self.distil_weight) * F.cross_entropy(y_pred_student, y_true)
-        loss += (self.distil_weight * self.temp * self.temp) * self.loss_fn(
+        loss = (1 - distil_weight) * F.cross_entropy(y_pred_student, y_true)
+        loss += (distil_weight * self.temp * self.temp) * self.loss_fn(
             soft_teacher_out, soft_student_out
         )
         return loss

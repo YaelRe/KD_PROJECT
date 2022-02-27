@@ -33,7 +33,8 @@ class KDFramework:
             optimizer_student,
             loss_fn=nn.KLDivLoss(),
             temp=20.0,
-            distil_weight=0.5,
+            distill_weight=0.5,
+            perturb_distill_weight=0.5,
             device="cpu",
             att_object=None,
             log=False,
@@ -45,7 +46,8 @@ class KDFramework:
         self.val_loader = val_loader
         self.optimizer_student = optimizer_student
         self.temp = temp
-        self.distil_weight = distil_weight
+        self.distill_weight = distill_weight
+        self.perturb_distill_weight = perturb_distill_weight
         self.att_object = att_object
         self.log = log
         self.logdir = logdir
@@ -76,7 +78,7 @@ class KDFramework:
                 self.device = torch.device("cpu")
 
         if teacher_data:
-            print('temp = {}, distil_weight = {}'.format(self.temp, self.distil_weight))
+            print('temp = {}, distil_weight = {}'.format(self.temp, self.distill_weight))
             # self.teacher_model = teacher_model.to(self.device)
         else:
             print("Warning!!! Teacher is NONE.")
@@ -125,7 +127,7 @@ class KDFramework:
                 teacher_out = teacher_out.to(self.device)
 
                 student_out = self.student_model(data)
-                loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                loss = self.calculate_kd_loss(student_out, teacher_out, label, self.distill_weight)
 
                 if isinstance(student_out, tuple):
                     student_out = student_out[0]
@@ -218,11 +220,11 @@ class KDFramework:
                 self.optimizer_student.zero_grad()
 
                 student_out = self.student_model(data)
-                reg_loss = self.calculate_kd_loss(student_out, teacher_out, label)
+                reg_loss = self.calculate_kd_loss(student_out, teacher_out, label, self.distill_weight)
                 ((1 - self.adv_w) * reg_loss).backward()
 
                 student_out_perturb = self.student_model(perturb_data)
-                perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label)
+                perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label, self.perturb_distill_weight)
                 (self.adv_w * perturb_loss).backward()
 
                 self.optimizer_student.step()
@@ -252,7 +254,7 @@ class KDFramework:
                 self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
                 self.writer_perturb_train_student_loss.add_scalar("Training perturb loss/Student", epoch_perturb_loss, ep)
                 self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
-                self.writer_perturb_train_student_acc.add_scalar("Training accuracy/Student", epoch_perturb_acc, ep)
+                self.writer_perturb_train_student_acc.add_scalar("Training perturb accuracy/Student", epoch_perturb_acc, ep)
                 self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
                 self.writer_perturb_val_student_acc.add_scalar("Validation perturb accuracy/Student", epoch_perturb_val_acc, ep)
                 self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
@@ -292,7 +294,7 @@ class KDFramework:
         else:
             self._train_student(epochs, save_model, save_model_pth)
 
-    def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true):
+    def calculate_kd_loss(self, y_pred_student, y_pred_teacher, y_true, distil_weight):
         """
         Custom loss function to calculate the KD loss for various implementations
         :param y_pred_student (Tensor): Predicted outputs from the student network
@@ -397,7 +399,10 @@ class KDFramework:
         """
 
         model = deepcopy(self.student_model).to(self.device)
-        accuracy, _ = self._evaluate_model(model)
+        if self.att_object:
+            accuracy, perturb_accuracy, _ = self._adv_evaluate_model(model)
+        else:
+            accuracy, _ = self._evaluate_model(model)
 
         return accuracy
 

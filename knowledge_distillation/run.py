@@ -27,6 +27,7 @@ parser.add_argument('--batch_size', default=256, type=int)
 parser.add_argument('--epochs', default=100, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--temperature', default=2.0, type=float, metavar='T')
 parser.add_argument('--distill_weight', default=0.5, type=float, metavar='DW')
+parser.add_argument('--perturb_distill_weight', default=0.5, type=float, metavar='PDW')
 parser.add_argument('--loss', default='MSE', type=str)
 parser.add_argument('--opt', default='SGD', type=str)
 parser.add_argument('--gpu', default=None, type=str, help='id(s) for CUDA_VISIBLE_DEVICES')
@@ -133,7 +134,8 @@ def main():
         optimizer_student=optimizer_student,
         loss_fn=student_loss,
         temp=args.temperature,
-        distil_weight=args.distill_weight,
+        distill_weight=args.distill_weight,
+        perturb_distill_weight=args.perturb_distill_weight,
         device=args.device,
         att_object=att_object,
         log=True,
