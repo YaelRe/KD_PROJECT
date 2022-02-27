@@ -245,8 +245,8 @@ class KDFramework:
 
             epoch_val_acc, epoch_perturb_val_acc, epoch_val_teacher_acc = self._adv_evaluate_model(self.student_model, verbose=True)
 
-            if epoch_val_acc > best_acc:
-                best_acc = epoch_val_acc
+            if epoch_perturb_val_acc > best_acc:
+                best_acc = epoch_perturb_val_acc
                 self.best_student_model_weights = deepcopy(
                     self.student_model.state_dict()
                 )
