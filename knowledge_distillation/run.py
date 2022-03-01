@@ -5,10 +5,11 @@ import datetime
 import argparse
 
 from models.wideresnet import wideresnet28
-from attacks import PGD, EPGD
+from attacks import PGD
 from data_loaders.cifar_data import get_loaders
 from util.cross_entropy import CrossEntropyLoss
-import torch.nn.functional as F
+from util.lookahead import Lookahead
+from torch.optim.lr_scheduler import MultiStepLR
 
 from knowledge_distillation.kd.soft_target_KD import SoftTargetKD
 import knowledge_distillation.kd.teacher_data as td
@@ -34,6 +35,11 @@ parser.add_argument('--gpu', default=None, type=str, help='id(s) for CUDA_VISIBL
 parser.add_argument('--device', default='cuda', type=str)
 parser.add_argument('--workers', default=4, type=int)
 parser.add_argument('--load_student_model', default=False, type=bool, help='load the student model from a file')
+parser.add_argument('--gamma', type=float, default=0.1, help='LR is multiplied by gamma at scheduled epochs.')
+parser.add_argument('--schedule', type=int, nargs='+', default=[100], help='Decrease learning rate at these epochs.')
+parser.add_argument('--lookahead',  default=False, type=bool, help='use lookahead optimizer')
+parser.add_argument('--la-k', type=int, default=6, help='k of lookahead.')
+parser.add_argument('--la-alpha', type=float, default=0.5, help='alpha of lookahead.')
 
 #####################
 # Attack params
@@ -113,6 +119,10 @@ def main():
     else:
         raise Exception("error: student optimizer wasn't selected")
 
+    if args.lookahead:
+        optimizer_student = Lookahead(optimizer_student, k=args.la_k, alpha=args.la_alpha)
+    scheduler = MultiStepLR(optimizer_student, milestones=args.schedule, gamma=args.gamma)
+
     print(f'lr = {args.lr}')
     print(f'student_loss = {student_loss}')
     print(f'student_optimizer = {optimizer_student}')
@@ -132,6 +142,7 @@ def main():
         train_loader=train_loader,
         val_loader=test_loader,
         optimizer_student=optimizer_student,
+        scheduler=scheduler,
         loss_fn=student_loss,
         temp=args.temperature,
         distill_weight=args.distill_weight,
