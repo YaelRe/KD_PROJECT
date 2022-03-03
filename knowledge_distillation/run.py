@@ -120,6 +120,8 @@ def main():
         raise Exception("error: student optimizer wasn't selected")
 
     if args.lookahead:
+        args.la_k = args.la_k.to(args.device)
+        args.la_alpha = args.la_alpha.to(args.device)
         optimizer_student = Lookahead(optimizer_student, k=args.la_k, alpha=args.la_alpha)
     scheduler = MultiStepLR(optimizer_student, milestones=args.schedule, gamma=args.gamma)
 
