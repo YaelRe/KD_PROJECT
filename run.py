@@ -12,8 +12,20 @@ from torch.distributions.dirichlet import Dirichlet
 from tqdm import tqdm
 
 from layers import get_noise_norm
+from models.wideresnet import wideresnet28
 
 matplotlib.use('Agg')
+
+
+def transform_checkpoint(cp):
+    new_cp = {}
+    for entry in cp:
+        new_name = entry.replace('module.', '')
+        if new_name.startswith('1.'):
+            new_name = new_name[2:]
+        new_cp[new_name] = cp[entry]
+    return new_cp
+
 
 def train(model, loader, epoch, optimizer, criterion, writer, iter, experiment_name, logger, device, dtype, batch_size,
           log_interval, clip_grad=0.):
@@ -112,21 +124,28 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     correct1_a, correct5_a = 0, 0
     tested = 0
     rad, pred_prob, pred_prob_var = 0, 0, 0
-    att.model = model  # TODO
+
+    student_model = wideresnet28()
+    student_model_path = 'knowledge_distillation/models/student_20220227-185809.pt'
+    student_checkpoint = torch.load(student_model_path, map_location='cpu')
+    student_model.load_state_dict(transform_checkpoint(student_checkpoint))
+    att.model = student_model  # TODO: pass here the student model
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
         x_a, output, output_a, _ = att.perturb(data, target, eps)
-
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
-        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), mode='clean_data', batch_idx=batch_idx, image_indices=image_indices)
+        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), mode='clean_data', batch_idx=batch_idx,
+                                image_indices=image_indices)
         correct1 += corr[0]
         correct5 += corr[1]
         tla = criterion(output_a, target).item()
         test_loss_a += tla  # sum up batch loss
         corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, 5),
-                                                        calc_prob=calc_prob, mode='perturb_data', batch_idx=batch_idx, image_indices=image_indices)
+                                                                          calc_prob=calc_prob, mode='perturb_data',
+                                                                          batch_idx=batch_idx,
+                                                                          image_indices=image_indices)
         correct1_a += corr_a[0]
         correct5_a += corr_a[1]
         rad += rad_batch
@@ -174,7 +193,8 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
         'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
 
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
-           test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(loader.dataset), rad, pred_prob, pred_prob_var
+           test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(
+        loader.dataset), rad, pred_prob, pred_prob_var
 
 
 def targeted_attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, num_classes,
@@ -210,7 +230,7 @@ def targeted_attack(model, loader, criterion, writer, iter, experiment_name, log
             tla = criterion(output_a, target).item()
             tla_targets += tla  # sum up targeted attacks
             corr_a_target, rad_target, pred_prob_target, pred_prob_var_target \
-                = correct(model, x_a, output_a, target,topk=(1, 5), calc_prob=calc_prob)
+                = correct(model, x_a, output_a, target, topk=(1, 5), calc_prob=calc_prob)
             corr1_a_targets += corr_a_target[0]
             corr5_a_targets += corr_a_target[1]
             rad_targets += rad_target
@@ -258,7 +278,8 @@ def targeted_attack(model, loader, criterion, writer, iter, experiment_name, log
         'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
 
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
-           test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(loader.dataset), rad, pred_prob, pred_prob_var
+           test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(
+        loader.dataset), rad, pred_prob, pred_prob_var
 
 
 def test(model, loader, criterion, writer, iter, experiment_name, logger, epoch, device, dtype):
@@ -296,7 +317,8 @@ def correct(model, data, output, target, topk=(1,), calc_prob=False, mode=None, 
 
     # time_stamp_start = datetime.now()
     maxk = max(topk)
-    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, save_data_mode=mode, batch_idx=batch_idx, image_indices=image_indices)
+    pred, pred_prob, pred_prob_var = model.predict(data, output, maxk, calc_prob=calc_prob, save_data_mode=mode,
+                                                   batch_idx=batch_idx, image_indices=image_indices)
     radius = -1
     pred = pred.t().type_as(target)
     correct = pred.eq(target.view(1, -1).expand_as(pred))
