@@ -31,6 +31,7 @@ class KDFramework:
             train_loader,
             val_loader,
             optimizer_student,
+            scheduler,
             loss_fn=nn.KLDivLoss(),
             temp=20.0,
             distill_weight=0.5,
@@ -45,6 +46,7 @@ class KDFramework:
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.optimizer_student = optimizer_student
+        self.scheduler = scheduler
         self.temp = temp
         self.distill_weight = distill_weight
         self.perturb_distill_weight = perturb_distill_weight
@@ -162,6 +164,7 @@ class KDFramework:
                     ep + 1, epoch_loss, epoch_acc
                 )
             )
+            self.scheduler.step()
 
         if self.log:
             self.writer_train_student_loss.close()
@@ -245,8 +248,8 @@ class KDFramework:
 
             epoch_val_acc, epoch_perturb_val_acc, epoch_val_teacher_acc = self._adv_evaluate_model(self.student_model, verbose=True)
 
-            if epoch_val_acc > best_acc:
-                best_acc = epoch_val_acc
+            if epoch_perturb_val_acc > best_acc:
+                best_acc = epoch_perturb_val_acc
                 self.best_student_model_weights = deepcopy(
                     self.student_model.state_dict()
                 )
@@ -264,6 +267,7 @@ class KDFramework:
                     ep + 1, epoch_loss, epoch_perturb_loss, epoch_acc, epoch_perturb_acc
                 )
             )
+            self.scheduler.step()
 
         if self.log:
             self.writer_train_student_loss.close()
