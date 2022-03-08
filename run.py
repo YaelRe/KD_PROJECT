@@ -130,6 +130,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     student_checkpoint = torch.load(student_model_path, map_location='cpu')
     student_model.load_state_dict(transform_checkpoint(student_checkpoint))
     att.model = student_model  # TODO: pass here the student model
+    print(f"Student model loaded, path:{student_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
