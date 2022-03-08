@@ -43,7 +43,7 @@ class PGD(Attack):
         best_pert = torch.zeros_like(x)
 
         self.model.eval()
-        self.model.detach()
+
         all_succ = torch.zeros(self.n_restarts * (self.n_iter + 1), x.shape[0], dtype=torch.bool).to(x.device)
         for rest in range(self.n_restarts):
             pert = torch.zeros_like(x, requires_grad=True)
@@ -57,6 +57,7 @@ class PGD(Attack):
                 curr_iter = rest * (self.n_iter + 1) + k
                 pert.requires_grad_()
                 x_i = x + pert
+                print(f"x_i device: {x_i.device}")
                 oi = self.model.forward(x_i)
                 probs = torch.softmax(oi, dim=1)
                 succ = torch.argmax(oi, dim=1) != y
