@@ -57,7 +57,7 @@ class PGD(Attack):
                 curr_iter = rest * (self.n_iter + 1) + k
                 pert.requires_grad_()
                 x_i = x + pert
-                print(f"param device: {self.model.parameters.device}")
+                print(f"model device: {self.model.device}")
                 oi = self.model.forward(x_i)
                 probs = torch.softmax(oi, dim=1)
                 succ = torch.argmax(oi, dim=1) != y
