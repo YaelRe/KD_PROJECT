@@ -126,8 +126,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     rad, pred_prob, pred_prob_var = 0, 0, 0
 
     student_model = wideresnet28()
-    student_model_path = 'knowledge_distillation/kd_models/student_20220227-185809.pt'
-    # student_checkpoint = torch.load(student_model_path)
+    student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
     student_model.load_state_dict(torch.load(student_model_path))
     student_model.to(device)
     att.model = student_model  # TODO: pass here the student model
