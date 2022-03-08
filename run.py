@@ -127,7 +127,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
 
     student_model = wideresnet28()
     student_model_path = 'knowledge_distillation/kd_models/student_20220227-185809.pt'
-    student_checkpoint = torch.load(student_model_path, map_location='cpu')
+    student_checkpoint = torch.load(student_model_path, map_location=device)
     student_model.load_state_dict(transform_checkpoint(student_checkpoint))
     att.model = student_model  # TODO: pass here the student model
     print(f"Loaded student model: {student_model_path}")
