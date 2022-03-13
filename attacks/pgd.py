@@ -96,5 +96,5 @@ class PGD(Attack):
 
         x_a = x + best_pert
         x_a.detach()
-        # o = self.model.forward(x)
-        return x_a, None, oi, all_succ
+        o = self.model.forward(x)
+        return x_a, o, oi, all_succ
