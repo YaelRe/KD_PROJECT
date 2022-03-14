@@ -134,10 +134,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
         k = 10
         correct_k = [0] * (k + 1)
         attack_model = wideresnet28()
-        # student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
         # TODO: local
-        # student_model_path = 'knowledge_distillation/models/student_20220227-175932.pt'
-        # print("=> loading checkpoint '{}'".format(student_model_path))
         # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
         # student_model.load_state_dict(transform_checkpoint(checkpoint))
         # TODO: server
