@@ -211,7 +211,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
 
     correct_k[:] = [x / len(loader.dataset) for x in correct_k]
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    fig_name = 'transfer_attack_' + current_time + '.png'
+    fig_name = experiment_name + current_time + '.png'
     plt.plot(correct_k)
     plt.ylabel('accuracy')
     plt.xlabel('k')
