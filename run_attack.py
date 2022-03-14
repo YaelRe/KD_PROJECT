@@ -238,8 +238,10 @@ def init_hyper_params(args, add_args, noise, m_forward, logger, device, dtype, r
             except:
                 pass
 
-    return model, val_loader, criterion  # Change to val_loader adina yael
-    # return model, train_loader, criterion
+    if args.loader_type == 'val_loader':
+        return model, val_loader, criterion
+    else:
+        return model, train_loader, criterion
 
 
 def resume_model(args, model, resume_path, optimizer, logger, device):
@@ -271,7 +273,7 @@ def resume_model(args, model, resume_path, optimizer, logger, device):
     return model, True
 
 
-def run_attacks(args, model, val_loader, criterion, logger, device, dtype, att_objects=None, save_data_mode=None):
+def run_attacks(args, model, loader, criterion, logger, device, dtype, att_objects=None, save_data_mode=None):
     if att_objects is None:
         att_objects = []
         for i, att in enumerate(args.attacks):
@@ -285,12 +287,12 @@ def run_attacks(args, model, val_loader, criterion, logger, device, dtype, att_o
     for i, att_object in enumerate(att_objects):
         if args.attacks_tar[i]:
             _, test_loss, accuracy1, accuracy5, test_loss_a, accuracy1_a, accuracy5_a, rad, pred_prob, pred_prob_var = \
-                targeted_attack(model, val_loader, criterion, None, 0, args.experiment_name, logger, 0, att_object,
+                targeted_attack(model, loader, criterion, None, 0, args.experiment_name, logger, 0, att_object,
                                 args.attacks_eps[i], args.num_classes, device, dtype,
                                 calc_prob=not args.no_pred_prob)
         else:
             _, test_loss, accuracy1, accuracy5, test_loss_a, accuracy1_a, accuracy5_a, rad, pred_prob, pred_prob_var = \
-                attack(model, val_loader, criterion, None, 0, args.experiment_name, logger, 0, att_object,
+                attack(model, loader, criterion, None, 0, args.experiment_name, logger, 0, att_object,
                        args.attacks_eps[i], device, dtype, calc_prob=not args.no_pred_prob, save_data_mode=save_data_mode)
 
             test_loss_list.append(test_loss)
@@ -332,7 +334,7 @@ def main():
                 'rank': args.noise_rank, 'noised_strength': args.weight_noise_d, 'noisef_strength': args.weight_noise_f,
                 'num_classes': args.num_classes, 'width': args.width}
 
-    model, val_loader, criterion = init_hyper_params(args, add_args, noise_sd, m_forward, logger, device, dtype)
+    model, loader, criterion = init_hyper_params(args, add_args, noise_sd, m_forward, logger, device, dtype)
 
     att_object = args.attack(model, criterion, **args.attacks_add_params[0])
 
@@ -342,7 +344,7 @@ def main():
 
     save_data_mode = args.save_data_mode
 
-    _, accuracy1, accuracy5, _, _, _, _, accuracy1_a_list, accuracy5_a_list = run_attacks(args, model, val_loader, criterion,
+    _, accuracy1, accuracy5, _, _, _, _, accuracy1_a_list, accuracy5_a_list = run_attacks(args, model, loader, criterion,
                                                                                     logger, device, dtype, att_objects, save_data_mode)
     print("accuracy1")
     print(accuracy1)
