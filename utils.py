@@ -135,6 +135,8 @@ def get_args():
     parser.add_argument('--no-norm', dest='no_norm', action='store_true', help='No normalization')
     parser.add_argument('--no-var-norm', dest='no_var_norm', action='store_true', help='Only normalize the mean')
 
+    # transfer attack
+    parser.add_argument('--transfer-attack', action='store_true', default=False, help='Use transfer attack')
 
     args = parser.parse_args()
 

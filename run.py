@@ -118,7 +118,7 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
-           calc_prob=False, test_batch_idx=0):
+           calc_prob=False, transfer_attack=False):
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -126,29 +126,33 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     correct1_a, correct5_a = 0, 0
     tested = 0
     rad, pred_prob, pred_prob_var = 0, 0, 0
+    correct_k = []
 
-    correct_k = [0]*11
-    student_model = wideresnet28()
-    student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
-    # TODO: local
-    # student_model_path = 'knowledge_distillation/models/student_20220227-175932.pt'
-    # print("=> loading checkpoint '{}'".format(student_model_path))
-    # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
-    # student_model.load_state_dict(transform_checkpoint(checkpoint))
-    # TODO: server
-    student_model.load_state_dict(torch.load(student_model_path))
-    student_model.to(device)
-    att.model = student_model  # TODO: pass here the student model
-    print(f"Loaded student model: {student_model_path}")
+    if transfer_attack:
+        k = 10
+        correct_k = [0] * (k + 1)
+        student_model = wideresnet28()
+        student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
+        # TODO: local
+        # student_model_path = 'knowledge_distillation/models/student_20220227-175932.pt'
+        # print("=> loading checkpoint '{}'".format(student_model_path))
+        # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
+        # student_model.load_state_dict(transform_checkpoint(checkpoint))
+        # TODO: server
+        student_model.load_state_dict(torch.load(student_model_path))
+        student_model.to(device)
+        att.model = student_model  # TODO: pass here the student model
+        print(f"Loaded attack model: {student_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
         x_a, output, output_a, all_succ = att.perturb(data, target, eps)
 
-        all_succ = torch.logical_not(all_succ)
-        all_succ = all_succ.long()
-        for k, corr in enumerate(all_succ):
-            correct_k[k] += corr.sum().item()
+        if transfer_attack:
+            all_succ = torch.logical_not(all_succ)
+            all_succ = all_succ.long()
+            for k, corr in enumerate(all_succ):
+                correct_k[k] += corr.sum().item()
 
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
@@ -209,14 +213,15 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
         'Adverserial set variance (eps={}): Certefication radius: {}, Prominent Class Probability: {}, '
         'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
 
-    correct_k[:] = [x / len(loader.dataset) for x in correct_k]
-    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    fig_name = experiment_name + current_time + '.png'
-    plt.plot(correct_k)
-    plt.ylabel('accuracy')
-    plt.xlabel('k')
-    plt.savefig(fig_name)
-    plt.close(fig_name)
+    if transfer_attack:
+        correct_k[:] = [x / len(loader.dataset) for x in correct_k]
+        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        fig_name = experiment_name + current_time + '.png'
+        plt.plot(correct_k)
+        plt.ylabel('accuracy')
+        plt.xlabel('k')
+        plt.savefig(fig_name)
+        plt.close(fig_name)
 
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
            test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(
