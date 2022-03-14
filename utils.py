@@ -70,6 +70,7 @@ def get_args():
                         help='Network architecture. Wideresnet implementation taken from: https://github.com/yaodongyu/TRADES')
     parser.add_argument('--layers', type=int, default=20, metavar='L', help='Number of layers')
     parser.add_argument('--width', type=float, default=1, metavar='W', help='Width multiplier')
+    parser.add_argument('--save_data_mode', type=str, default=None, help='save data mode for teacher data')
 
     # Attack
     parser.add_argument('--attack', default='pgd', type=str, metavar='ATT', help='attack type')
