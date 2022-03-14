@@ -137,6 +137,7 @@ def get_args():
 
     # transfer attack
     parser.add_argument('--transfer-attack', action='store_true', default=False, help='Use transfer attack')
+    parser.add_argument('--attack-path', type=str, metavar='PATH', help='path to attack model (default: none)')
 
     args = parser.parse_args()
 

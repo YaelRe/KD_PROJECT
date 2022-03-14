@@ -291,7 +291,8 @@ def run_attacks(args, model, val_loader, criterion, logger, device, dtype, att_o
         else:
             _, test_loss, accuracy1, accuracy5, test_loss_a, accuracy1_a, accuracy5_a, rad, pred_prob, pred_prob_var = \
                 attack(model, val_loader, criterion, None, 0, args.experiment_name, logger, 0, att_object,
-                       args.attacks_eps[i], device, dtype, calc_prob=not args.no_pred_prob, transfer_attack=args.transfer_attack)
+                       args.attacks_eps[i], device, dtype, calc_prob=not args.no_pred_prob,
+                       transfer_attack=args.transfer_attack, attack_model_path=args.attack_path)
 
             test_loss_list.append(test_loss)
             accuracy1_list.append(accuracy1)

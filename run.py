@@ -118,7 +118,7 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
-           calc_prob=False, transfer_attack=False):
+           calc_prob=False, transfer_attack=False, attack_model_path=None):
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -129,20 +129,22 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     correct_k = []
 
     if transfer_attack:
+        if attack_model_path is None:
+            print("Error!! attack_model_path is None!")
         k = 10
         correct_k = [0] * (k + 1)
-        student_model = wideresnet28()
-        student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
+        attack_model = wideresnet28()
+        # student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
         # TODO: local
         # student_model_path = 'knowledge_distillation/models/student_20220227-175932.pt'
         # print("=> loading checkpoint '{}'".format(student_model_path))
         # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
         # student_model.load_state_dict(transform_checkpoint(checkpoint))
         # TODO: server
-        student_model.load_state_dict(torch.load(student_model_path))
-        student_model.to(device)
-        att.model = student_model  # TODO: pass here the student model
-        print(f"Loaded attack model: {student_model_path}")
+        attack_model.load_state_dict(torch.load(attack_model_path))
+        attack_model.to(device)
+        att.model = attack_model  # TODO: pass here the student model
+        print(f"Loaded attack model: {attack_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
