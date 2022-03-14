@@ -128,20 +128,22 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     rad, pred_prob, pred_prob_var = 0, 0, 0
     correct_k = []
 
+    att.model = model
     if transfer_attack:
-        if attack_model_path is None:
-            print("Error!! attack_model_path is None!")
         k = 10
         correct_k = [0] * (k + 1)
-        attack_model = wideresnet28()
-        # TODO: local
-        # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
-        # student_model.load_state_dict(transform_checkpoint(checkpoint))
-        # TODO: server
-        attack_model.load_state_dict(torch.load(attack_model_path))
-        attack_model.to(device)
-        att.model = attack_model  # TODO: pass here the student model
-        print(f"Loaded attack model: {attack_model_path}")
+        if attack_model_path is None:
+            print("\n==> Loading smoothed model as Attack model")
+        else:
+            attack_model = wideresnet28()
+            # TODO: local
+            # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
+            # student_model.load_state_dict(transform_checkpoint(checkpoint))
+            # TODO: server
+            attack_model.load_state_dict(torch.load(attack_model_path))
+            attack_model.to(device)
+            att.model = attack_model  # TODO: pass here the student model
+            print(f"Loaded attack model: {attack_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
