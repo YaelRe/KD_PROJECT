@@ -1,7 +1,9 @@
 import os
 import shutil
+import datetime
 
 import matplotlib
+import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 import torch.nn.parallel
@@ -125,8 +127,15 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     tested = 0
     rad, pred_prob, pred_prob_var = 0, 0, 0
 
+    correct_k = [0]*11
     student_model = wideresnet28()
-    student_model_path = 'knowledge_distillation/kd_models/student_20220303-195029.pt'
+    student_model_path = 'knowledge_distillation/kd_models/student_20220227-175932.pt'
+    # TODO: local
+    # student_model_path = 'knowledge_distillation/models/student_20220227-175932.pt'
+    # print("=> loading checkpoint '{}'".format(student_model_path))
+    # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
+    # student_model.load_state_dict(transform_checkpoint(checkpoint))
+    # TODO: server
     student_model.load_state_dict(torch.load(student_model_path))
     student_model.to(device)
     att.model = student_model  # TODO: pass here the student model
@@ -134,17 +143,23 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
-        x_a, output, output_a, _ = att.perturb(data, target, eps)
+        x_a, output, output_a, all_succ = att.perturb(data, target, eps)
+
+        all_succ = torch.logical_not(all_succ)
+        all_succ = all_succ.long()
+        for k, corr in enumerate(all_succ):
+            correct_k[k] += corr.sum().item()
+
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
-        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), mode='clean_data', batch_idx=batch_idx,
+        corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), batch_idx=batch_idx,
                                 image_indices=image_indices)
         correct1 += corr[0]
         correct5 += corr[1]
         tla = criterion(output_a, target).item()
         test_loss_a += tla  # sum up batch loss
         corr_a, rad_batch, pred_prob_batch, pred_prob_var_batch = correct(model, x_a, output_a, target, topk=(1, 5),
-                                                                          calc_prob=calc_prob, mode='perturb_data',
+                                                                          calc_prob=calc_prob,
                                                                           batch_idx=batch_idx,
                                                                           image_indices=image_indices)
         correct1_a += corr_a[0]
@@ -178,6 +193,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
                            epoch)
         writer.add_scalars('epoch/top5', {experiment_name + "_val_adversarial": correct5_a / len(loader.dataset)},
                            epoch)
+
     logger.debug(
         'Test set: Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
         'Top5: {}/{} ({:.2f}%)'.format(test_loss, int(correct1), len(loader.dataset),
@@ -192,6 +208,15 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     logger.debug(
         'Adverserial set variance (eps={}): Certefication radius: {}, Prominent Class Probability: {}, '
         'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
+
+    correct_k[:] = [x / len(loader.dataset) for x in correct_k]
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    fig_name = 'transfer_attack_' + current_time + '.png'
+    plt.plot(correct_k)
+    plt.ylabel('accuracy')
+    plt.xlabel('k')
+    plt.savefig(fig_name)
+    plt.close(fig_name)
 
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
            test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(
