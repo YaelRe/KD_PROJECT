@@ -14,11 +14,11 @@ There are two types of aggregated outputs that can be retrived with the followin
  ### Smoothed Prediction
  
  ```
-run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
+ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
 ```
  ### Soft smoothed Prediction
   ```
-run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
+ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
 ```
 
 --resume variable should contain the path of the model_best.pth.tar file
@@ -28,7 +28,7 @@ To run knowledge distillation trainig use the following command lines:
  ### Training
  
  ```
-./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.5
+ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.5
 ```
 There are two types of aggregated outputs for the teacher model:
   - Smoothe Prediction
@@ -41,7 +41,7 @@ There are two types of aggregated outputs for the teacher model:
  
  ### Adversarial training
  ```
-./knowledge_distillation/run.py -- --adv_training True  --learning-rate 0.0001 -- --loss CrossEntropy --opt ADAM  --hist_data True --adv_training True --distill_weight 0.75 --perturb_distill_weight 0.25 
+ipython ./knowledge_distillation/run.py -- --adv_training True  --learning-rate 0.0001 -- --loss CrossEntropy --opt ADAM  --hist_data True --adv_training True --distill_weight 0.75 --perturb_distill_weight 0.25 
 ```
 
 
@@ -61,7 +61,7 @@ To run transfer attack the following parameters need to be incorporated:
 
 Use the following command to run a transfer attack: 
 ```
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --attack-path knowledge_distillation/kd_models/student_20220227-175932.pt --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_student_cni_eps8 --gpus 0 
+ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --attack-path knowledge_distillation/kd_models/student_20220227-175932.pt --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_student_cni_eps8 --gpus 0 
 ```
 
 Parameters we experimented on:
