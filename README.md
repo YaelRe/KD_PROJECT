@@ -37,7 +37,7 @@ There are two types of aggregated outputs for the teacher model:
     - To use this model outputs add this variable: --soft_data true  
 
  
- --hist_data True...
+
  
  ### Adversarial training
  ```
@@ -45,7 +45,7 @@ There are two types of aggregated outputs for the teacher model:
 ```
 
 
-**Results on CIFAR10**
+### Results on CIFAR10
 
 |Method | Clean accuracy| PGD-10 accuracy|
 |--- |---|---|
@@ -68,7 +68,7 @@ Parameters we experimented on:
 <li>--eps - values we used: 2, 8, 30</li>
 <li>--noise-sd - this param determines if the model is smoothed cni [0.25] or cni [0]</li>
 
-###Results of Transfer Attack
+### Results of Transfer Attack
 Results for transfer attack using epsilon = 8/255.
 
 |Attack Model| Target Model| Clean Accuracy| PGD-10 Accuracy|
