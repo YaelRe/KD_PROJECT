@@ -142,7 +142,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
             # TODO: server
             attack_model.load_state_dict(torch.load(attack_model_path))
             attack_model.to(device)
-            att.model = attack_model  # TODO: pass here the student model
+            att.model = attack_model
             print(f"Loaded attack model: {attack_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
