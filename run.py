@@ -1,7 +1,9 @@
 import os
 import shutil
+import datetime
 
 import matplotlib
+import matplotlib.pyplot as plt
 import torch
 import torch.nn.functional as F
 import torch.nn.parallel
@@ -12,8 +14,19 @@ from torch.distributions.dirichlet import Dirichlet
 from tqdm import tqdm
 
 from layers import get_noise_norm
+from models.wideresnet import wideresnet28
 
 matplotlib.use('Agg')
+
+
+def transform_checkpoint(cp):
+    new_cp = {}
+    for entry in cp:
+        new_name = entry.replace('module.', '')
+        if new_name.startswith('1.'):
+            new_name = new_name[2:]
+        new_cp[new_name] = cp[entry]
+    return new_cp
 
 
 def train(model, loader, epoch, optimizer, criterion, writer, iter, experiment_name, logger, device, dtype, batch_size,
@@ -105,7 +118,7 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
-           calc_prob=False, save_data_mode=None):
+           calc_prob=False, save_data_mode=None, transfer_attack=False, attack_model_path=None):
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -113,11 +126,35 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     correct1_a, correct5_a = 0, 0
     tested = 0
     rad, pred_prob, pred_prob_var = 0, 0, 0
+    correct_k = []
+
     att.model = model
+    if transfer_attack:
+        k = 10
+        correct_k = [0] * (k + 1)
+        if attack_model_path is None:
+            print("\n==> Loading smoothed model as Attack model")
+        else:
+            attack_model = wideresnet28()
+            # TODO: local
+            # checkpoint = torch.load(student_model_path, map_location='cpu')  # map_location=device
+            # student_model.load_state_dict(transform_checkpoint(checkpoint))
+            # TODO: server
+            attack_model.load_state_dict(torch.load(attack_model_path))
+            attack_model.to(device)
+            att.model = attack_model
+            print(f"Loaded attack model: {attack_model_path}")
 
     for batch_idx, (data, target, image_indices) in enumerate(tqdm(loader)):
         data, target = data.to(device=device, dtype=dtype), target.to(device=device)
-        x_a, output, output_a, _ = att.perturb(data, target, eps)
+        x_a, output, output_a, all_succ = att.perturb(data, target, eps)
+
+        if transfer_attack:
+            all_succ = torch.logical_not(all_succ)
+            all_succ = all_succ.long()
+            for k, corr in enumerate(all_succ):
+                correct_k[k] += corr.sum().item()
+
         tl = criterion(output, target).item()
         test_loss += tl  # sum up batch loss
         corr, _, _, _ = correct(model, data, output, target, topk=(1, 5), save_data_mode=save_data_mode, batch_idx=batch_idx,
@@ -161,6 +198,7 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
                            epoch)
         writer.add_scalars('epoch/top5', {experiment_name + "_val_adversarial": correct5_a / len(loader.dataset)},
                            epoch)
+
     logger.debug(
         'Test set: Average loss: {:.4f}, Top1: {}/{} ({:.2f}%), '
         'Top5: {}/{} ({:.2f}%)'.format(test_loss, int(correct1), len(loader.dataset),
@@ -175,6 +213,16 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
     logger.debug(
         'Adverserial set variance (eps={}): Certefication radius: {}, Prominent Class Probability: {}, '
         'Prominent Class Variance: {}'.format(eps, rad, pred_prob, pred_prob_var))
+
+    if transfer_attack:
+        correct_k[:] = [x / len(loader.dataset) for x in correct_k]
+        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        fig_name = experiment_name + current_time + '.png'
+        plt.plot(correct_k)
+        plt.ylabel('accuracy')
+        plt.xlabel('k')
+        plt.savefig(fig_name)
+        plt.close(fig_name)
 
     return iter, test_loss, correct1 / len(loader.dataset), correct5 / len(loader.dataset), \
            test_loss_a, correct1_a / len(loader.dataset), correct5_a / len(
