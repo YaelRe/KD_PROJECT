@@ -245,14 +245,21 @@ def init_hyper_params(args, add_args, noise, m_forward, logger, device, dtype, r
 
 
 def resume_model(args, model, resume_path, optimizer, logger, device):
-    if os.path.isfile(resume_path):
+    if os.path.isfile(resume_path) or ".pt" in resume_path:
         logger.info("=> loading checkpoint '{}'".format(resume_path))
-        checkpoint = torch.load(resume_path, map_location=device)
-        args.start_epoch = checkpoint['epoch'] - 1
-        # best_test = checkpoint['best_prec1']
-        model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        # optimizer.load_state_dict(checkpoint['optimizer'])
-        logger.info("=> loaded checkpoint '{}' (epoch {})".format(resume_path, checkpoint['epoch']))
+
+        if "tar" in resume_path:
+            checkpoint = torch.load(resume_path, map_location=device)
+            args.start_epoch = checkpoint['epoch'] - 1
+            # best_test = checkpoint['best_prec1']
+            model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+            # optimizer.load_state_dict(checkpoint['optimizer'])
+            logger.info("=> loaded checkpoint '{}' (epoch {})".format(resume_path, checkpoint['epoch']))
+        else:
+            model.load_state_dict(torch.load(resume_path))
+            model.to(device)
+            print(f"Loaded student model: {resume_path}")
+
     elif os.path.isdir(resume_path):
         checkpoint_path = os.path.join(resume_path, 'checkpoint.pth.tar')
         csv_path = os.path.join(resume_path, 'results.csv')
