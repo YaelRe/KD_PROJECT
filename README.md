@@ -68,14 +68,14 @@ Parameters we experimented on:
 <li>--eps - values we used: 2, 8, 30</li>
 <li>--noise-sd - this param determines if the model is smoothed cni [0.25] or cni [0]</li>
 
-###Results of Transfer Attack
+### Results of Transfer Attack
 Results for transfer attack using epsilon = 8/255.
 
 |Attack Model| Target Model| Clean Accuracy| PGD-10 Accuracy|
 |--- |--- |--- |---|
 |CNI| CNI| 88.72| 63.67|
 |KD student| CNI| 88.76| 63.4|
-|KD student| Smoothed CNI| | |
+|KD student| Smoothed CNI|42.74 |32.95 |
 |KD student| KD student| | |
 
 These result show that using Knowledge Distillation the student model was abel to learn a successful 
