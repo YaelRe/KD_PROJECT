@@ -11,12 +11,12 @@ and can perform on perturbed data similar to the smoothed model or even better.
 In order to run knowledge distillation trainig we need to get the smoothed model outputs.
 There are two types of aggregated outputs that can be retrived with the following command lines:
 
- ### Smoothe Prediction
+ ### Smoothed Prediction
  
  ```
 run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
 ```
- ### Soft smoothe Prediction
+ ### Soft smoothed Prediction
   ```
 run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
 ```
@@ -53,6 +53,17 @@ There are two types of aggregated outputs for the teacher model:
 |Smooth soft prediction smoothing | 88.53| 63.48|
 |KD prediction smoothing | 79.9| 46|
 |KD soft prediction smoothing | 82.13| 45.83|
+
+## Transfer Attack
+To run transfer attack the following parameters need to be used:
+<li>--transfer-attack</li>
+<li>--attack-path [path to the model that the attack will be create on]</li>
+
+Use the followind command to run a transfer attack: 
+```
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --attack-path knowledge_distillation/kd_models/student_20220227-175932.pt --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_student_cni_eps8 --gpus 0 
+```
+The transfer attack combinations we experimented with:
 
 
 
