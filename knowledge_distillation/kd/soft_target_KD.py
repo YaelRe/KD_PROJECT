@@ -34,8 +34,11 @@ class SoftTargetKD(KDFramework):
         temp=20.0,
         distill_weight=0.5,
         perturb_distill_weight=0.5,
+        eps=8,
         device="cpu",
         att_object=None,
+        attack_model=None,
+        experiment_name='exp_name',
         log=False,
         logdir="./Experiments",
     ):
@@ -50,8 +53,11 @@ class SoftTargetKD(KDFramework):
             temp,
             distill_weight,
             perturb_distill_weight,
+            eps,
             device,
             att_object,
+            attack_model,
+            experiment_name,
             log,
             logdir,
         )

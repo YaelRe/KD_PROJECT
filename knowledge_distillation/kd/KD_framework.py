@@ -2,9 +2,14 @@ import torch
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+import datetime
 
+import matplotlib
+import matplotlib.pyplot as plt
 from copy import deepcopy
 import os
+
+matplotlib.use('Agg')
 
 
 class KDFramework:
@@ -36,8 +41,11 @@ class KDFramework:
             temp=20.0,
             distill_weight=0.5,
             perturb_distill_weight=0.5,
+            eps=8,
             device="cpu",
             att_object=None,
+            attack_model=None,
+            experiment_name='exp',
             log=False,
             logdir="./Experiments",
     ):
@@ -50,16 +58,19 @@ class KDFramework:
         self.temp = temp
         self.distill_weight = distill_weight
         self.perturb_distill_weight = perturb_distill_weight
+        self.eps = eps / 255.0
         self.att_object = att_object
+        self.attack_model = attack_model
+        self.experiment_name = experiment_name
         self.log = log
         self.logdir = logdir
         self.adv_w = 0.5
 
         if self.log:
-            self.writer_train_student_loss = SummaryWriter(log_dir=logdir+"_train_student_loss")
-            self.writer_train_student_acc = SummaryWriter(log_dir=logdir+"_train_student_acc")
-            self.writer_val_student_acc = SummaryWriter(log_dir=logdir+"_val_student_acc")
-            self.writer_val_student_teacher_acc = SummaryWriter(log_dir=logdir+"_val_student_teacher_acc")
+            self.writer_train_student_loss = SummaryWriter(log_dir=logdir + "_train_student_loss")
+            self.writer_train_student_acc = SummaryWriter(log_dir=logdir + "_train_student_acc")
+            self.writer_val_student_acc = SummaryWriter(log_dir=logdir + "_val_student_acc")
+            self.writer_val_student_teacher_acc = SummaryWriter(log_dir=logdir + "_val_student_teacher_acc")
             if self.att_object:
                 self.writer_perturb_train_student_loss = SummaryWriter(log_dir=logdir + "_perturb_train_student_loss")
                 self.writer_perturb_train_student_acc = SummaryWriter(log_dir=logdir + "_perturb_train_student_acc")
@@ -156,7 +167,8 @@ class KDFramework:
                 self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
                 self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
                 self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
-                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
+                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student",
+                                                               epoch_val_teacher_acc, ep)
 
             loss_arr.append(epoch_loss)
             print(
@@ -215,7 +227,7 @@ class KDFramework:
                                                                                  image_indices=image_indices.tolist())
                 teacher_out = teacher_out.to(self.device)
 
-                perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=8/255)
+                perturb_data, _, _, _ = self.att_object.perturb(data, label, eps=self.eps)
                 for param in self.student_model.parameters():
                     param.requires_grad = True
 
@@ -227,7 +239,8 @@ class KDFramework:
                 ((1 - self.adv_w) * reg_loss).backward()
 
                 student_out_perturb = self.student_model(perturb_data)
-                perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label, self.perturb_distill_weight)
+                perturb_loss = self.calculate_kd_loss(student_out_perturb, teacher_out, label,
+                                                      self.perturb_distill_weight)
                 (self.adv_w * perturb_loss).backward()
 
                 self.optimizer_student.step()
@@ -246,7 +259,8 @@ class KDFramework:
             epoch_acc = correct / length_of_dataset
             epoch_perturb_acc = perturb_correct / length_of_dataset
 
-            epoch_val_acc, epoch_perturb_val_acc, epoch_val_teacher_acc = self._adv_evaluate_model(self.student_model, verbose=True)
+            epoch_val_acc, epoch_perturb_val_acc, epoch_val_teacher_acc = self._adv_evaluate_model(self.student_model,
+                                                                                                   verbose=True)
 
             if epoch_perturb_val_acc > best_acc:
                 best_acc = epoch_perturb_val_acc
@@ -255,12 +269,16 @@ class KDFramework:
                 )
             if self.log:
                 self.writer_train_student_loss.add_scalar("Training loss/Student", epoch_loss, ep)
-                self.writer_perturb_train_student_loss.add_scalar("Training perturb loss/Student", epoch_perturb_loss, ep)
+                self.writer_perturb_train_student_loss.add_scalar("Training perturb loss/Student", epoch_perturb_loss,
+                                                                  ep)
                 self.writer_train_student_acc.add_scalar("Training accuracy/Student", epoch_acc, ep)
-                self.writer_perturb_train_student_acc.add_scalar("Training perturb accuracy/Student", epoch_perturb_acc, ep)
+                self.writer_perturb_train_student_acc.add_scalar("Training perturb accuracy/Student", epoch_perturb_acc,
+                                                                 ep)
                 self.writer_val_student_acc.add_scalar("Validation accuracy/Student", epoch_val_acc, ep)
-                self.writer_perturb_val_student_acc.add_scalar("Validation perturb accuracy/Student", epoch_perturb_val_acc, ep)
-                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student", epoch_val_teacher_acc, ep)
+                self.writer_perturb_val_student_acc.add_scalar("Validation perturb accuracy/Student",
+                                                               epoch_perturb_val_acc, ep)
+                self.writer_val_student_teacher_acc.add_scalar("Validation Teacher accuracy/Student",
+                                                               epoch_val_teacher_acc, ep)
 
             print(
                 "Epoch: {}, Loss: {}, Loss_perturb: {}, Accuracy: {}, Accuracy_perturb: {}".format(
@@ -364,7 +382,7 @@ class KDFramework:
             data = data.to(self.device)
             target = target.to(self.device)
 
-            perturb_data, _, _, _ = self.att_object.perturb(data, target, eps=8 / 255)
+            perturb_data, _, _, _ = self.att_object.perturb(data, target, eps=self.eps)
 
             with torch.no_grad():
                 student_output = model(data)
@@ -442,6 +460,56 @@ class KDFramework:
             print("Teacher Validation Accuracy: {}".format(accuracy))
         return outputs, accuracy
 
+    def transfer_attack(self):
+        """
+        Create an attack on the attack_model and test the target data on the perturbed data
+        """
+        k = 10
+        correct_k = [0] * (k + 1)
+        length_of_dataset = len(self.val_loader.dataset)
+        correct = 0
+        perturb_correct = 0
+
+        if self.attack_model is None:
+            print("ERROR! attack model is None")
+
+        self.student_model.eval()
+
+        for data, target, image_indices in self.val_loader:
+            data = data.to(self.device)
+            target = target.to(self.device)
+
+            perturb_data, _, _, all_succ = self.att_object.perturb(data, target, eps=self.eps)
+            all_succ = torch.logical_not(all_succ)
+            all_succ = all_succ.long()
+            for k, corr in enumerate(all_succ):
+                correct_k[k] += corr.sum().item()
+
+            with torch.no_grad():
+                # clean data
+                student_output = self.student_model(data)
+                student_pred = student_output.argmax(dim=1, keepdim=True)
+                correct += student_pred.eq(target.view_as(student_pred)).sum().item()
+                # perturb data
+                student_perturb_output = self.student_model(perturb_data)
+                student_perturb_pred = student_perturb_output.argmax(dim=1, keepdim=True)
+                perturb_correct += student_perturb_pred.eq(target.view_as(student_perturb_pred)).sum().item()
+
+        correct_k[:] = [x / length_of_dataset for x in correct_k]
+        current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        fig_name = self.experiment_name + current_time + '.png'
+        plt.plot(correct_k)
+        plt.ylabel('accuracy')
+        plt.xlabel('k')
+        plt.savefig(fig_name)
+        plt.close(fig_name)
+
+        accuracy = correct / length_of_dataset
+        perturb_accuracy = perturb_correct / length_of_dataset
+
+        print(f"accuracy: {accuracy}")
+        print(f"perturb accuracy: {perturb_accuracy}")
+
     def get_parameters(self):
         """
         Get the number of parameters for the teacher and the student network
@@ -459,4 +527,3 @@ class KDFramework:
         """
 
         pass
-

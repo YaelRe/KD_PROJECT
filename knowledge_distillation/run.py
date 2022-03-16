@@ -17,7 +17,8 @@ import knowledge_distillation.kd.teacher_data as td
 parser = argparse.ArgumentParser(description='KD Training')
 parser.add_argument('--hist_data', default=False, type=bool)
 parser.add_argument('--soft_data', default=False, type=bool)
-parser.add_argument('--log_dir', '--log-dir', type=str, default='knowledge_distillation/logs/', help='folder to save model and training log')
+parser.add_argument('--log_dir', '--log-dir', type=str, default='knowledge_distillation/logs/',
+                    help='folder to save model and training log')
 parser.add_argument('--lr', '--learning-rate', default=0.01, type=float, help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
 parser.add_argument('--nesterov_momentum', default=True, type=bool)
@@ -37,9 +38,11 @@ parser.add_argument('--workers', default=4, type=int)
 parser.add_argument('--load_student_model', default=False, type=bool, help='load the student model from a file')
 parser.add_argument('--gamma', type=float, default=0.1, help='LR is multiplied by gamma at scheduled epochs.')
 parser.add_argument('--schedule', type=int, nargs='+', default=[100], help='Decrease learning rate at these epochs.')
-parser.add_argument('--lookahead',  default=False, type=bool, help='use lookahead optimizer')
+parser.add_argument('--lookahead', default=False, type=bool, help='use lookahead optimizer')
 parser.add_argument('--la-k', type=int, default=6, help='k of lookahead.')
 parser.add_argument('--la-alpha', type=float, default=0.5, help='alpha of lookahead.')
+parser.add_argument('--train', default=False, type=bool)
+parser.add_argument('--eval-teacher', default=False, type=bool)
 
 #####################
 # Attack params
@@ -63,7 +66,11 @@ parser.add_argument('--no-grad-attack', action='store_true',
 # PGD-specific
 parser.add_argument('--random-start', default=True, type=bool)
 
-# TODO: EPGD-specific?
+# Transfer attack
+parser.add_argument('--transfer-attack', action='store_true', default=False, help='Use transfer attack')
+parser.add_argument('--attack-path', type=str, metavar='PATH', help='path to attack model (default: none)')
+parser.add_argument('--experiment-name', default='exp1', type=str, help='experiment name')
+
 
 # args.epsilon /= 256.0
 # args.init_norm_DDN /= 256.0
@@ -85,6 +92,23 @@ def main():
         # args.start_epoch = checkpoint['epoch'] - 1
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
         student_model.load_state_dict(transform_checkpoint(checkpoint))
+
+    transfer_attack_obj = None
+    attack_model = None
+    target_model = None
+    if args.transfer_attack:
+        # if "tar" in resume_path:
+        #     checkpoint = torch.load(resume_path, map_location=device)
+        #     args.start_epoch = checkpoint['epoch'] - 1
+        #     model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+        #     logger.info("=> loaded checkpoint '{}' (epoch {})".format(resume_path, checkpoint['epoch']))
+        # else:
+        print(f"=> Loading attack model: {args.attack_path}")
+        attack_model = wideresnet28()
+        checkpoint = torch.load(args.attack_path, map_location='cpu')  # map_location=device
+        attack_model.load_state_dict(transform_checkpoint(checkpoint))
+        # attack_model.load_state_dict(torch.load(args.attack_path))
+        # attack_model.to(args.device)
 
     teacher_data = td.TeacherData(data_dic={'hist_data': args.hist_data,
                                             'soft_data': args.soft_data},
@@ -132,6 +156,8 @@ def main():
 
     if args.adv_training:
         att_object = PGD(student_model, student_loss, n_iter=args.n_iter, alpha=args.alpha)
+    elif args.transfer_attack:
+        att_object = PGD(attack_model, student_loss, n_iter=args.n_iter, alpha=args.alpha)
     else:
         att_object = None
 
@@ -149,15 +175,23 @@ def main():
         perturb_distill_weight=args.perturb_distill_weight,
         device=args.device,
         att_object=att_object,
+        attack_model=attack_model,
+        experiment_name=args.experiment_name,
         log=True,
         logdir='knowledge_distillation/logs/' + current_time
     )
 
-    soft_target_KD.train_student(epochs=args.epochs,
-                                 save_model=True,
-                                 save_model_pth=f"knowledge_distillation/kd_models/student_{current_time}.pt")
+    if args.train:
+        soft_target_KD.train_student(epochs=args.epochs,
+                                     save_model=True,
+                                     save_model_pth=f"knowledge_distillation/kd_models/student_{current_time}.pt")
+    if args.eval_teacher:
+        soft_target_KD.evaluate_teacher()
+
+    if args.transfer_attack:
+        soft_target_KD.transfer_attack()
+
     soft_target_KD.evaluate()
-    soft_target_KD.evaluate_teacher()
 
 
 def transform_checkpoint(cp):
