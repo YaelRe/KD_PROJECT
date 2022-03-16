@@ -118,7 +118,7 @@ def adv_train(model, loader, epoch, optimizer, criterion, writer, iter, experime
 
 
 def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoch, att, eps, device, dtype,
-           calc_prob=False, save_data_mode=None, transfer_attack=False, attack_model_path=None):
+           calc_prob=False, save_data_mode=None, transfer_attack=False, attack_model_path=None, attack_model=None):
     model.eval()
     test_loss = 0
     correct1, correct5 = 0, 0
@@ -133,7 +133,11 @@ def attack(model, loader, criterion, writer, iter, experiment_name, logger, epoc
         k = 10
         correct_k = [0] * (k + 1)
         if attack_model_path is None:
-            print("\n==> Loading smoothed model as Attack model")
+            if attack_model is None:
+                print("ERROR!! attack_model is None!")
+            else:
+                att.model = attack_model
+                print("\n==> Loading smoothed model as Attack model")
         else:
             attack_model = wideresnet28()
             # TODO: local
