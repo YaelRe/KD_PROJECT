@@ -105,10 +105,10 @@ def main():
         # else:
         print(f"=> Loading attack model: {args.attack_path}")
         attack_model = wideresnet28()
-        checkpoint = torch.load(args.attack_path, map_location='cpu')  # map_location=device
-        attack_model.load_state_dict(transform_checkpoint(checkpoint))
-        # attack_model.load_state_dict(torch.load(args.attack_path))
-        # attack_model.to(args.device)
+        # checkpoint = torch.load(args.attack_path, map_location='cpu')  # map_location=device
+        # attack_model.load_state_dict(transform_checkpoint(checkpoint))
+        attack_model.load_state_dict(torch.load(args.attack_path))
+        attack_model.to(args.device)
 
     teacher_data = td.TeacherData(data_dic={'hist_data': args.hist_data,
                                             'soft_data': args.soft_data},
