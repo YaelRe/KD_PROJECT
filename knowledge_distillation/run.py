@@ -102,7 +102,7 @@ def main():
         print("\nTransfer attack")
         print(f"epsilon: {args.epsilon}")
         print(f"attack model: {args.attack_path}")
-        print(f"experiment name: {args.epxeriment_name}")
+        print(f"experiment name: {args.experiment_name}")
         # if "tar" in resume_path:
         #     checkpoint = torch.load(resume_path, map_location=device)
         #     args.start_epoch = checkpoint['epoch'] - 1
