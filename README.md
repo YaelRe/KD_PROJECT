@@ -74,7 +74,9 @@ Results for transfer attack using epsilon = 8/255.
 |Attack Model| Target Model| Clean Accuracy| PGD-10 Accuracy|
 |--- |--- |--- |---|
 |CNI| CNI| 88.72| 63.67|
+|CNI| Smoothed CNI| 88.74| 88.66|
 |Smoothed CNI| Smoothed CNI| 42.81| 36.58|
+|Smoothed CNI| CNI| 42.76| 42.61|
 |KD student| CNI| 88.76| 63.4|
 |KD student| Smoothed CNI|42.74 |32.95 |
 |KD student| KD student| | |

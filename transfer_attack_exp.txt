@@ -49,14 +49,14 @@ srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresn
 -----------------------------------------------------------------------------------------------
 **DONE**
 cni -> smoothed cni
-cni: noise_sd = 0
+smoothed cni: noise_sd = 0.25
 epsilon = 2, 8, 30
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 2 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps2_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 2 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps2_ --gpus 0 | tee results_transfer_attack_mc.txt
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps8_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps8_ --gpus 0 | tee results_transfer_attack_mc.txt
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_cni_scni_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
 
 -----------------------------------------------------------------------------------------------
 **DONE**
@@ -64,11 +64,11 @@ smoothed cni -> cni
 cni: noise_sd = 0
 epsilon = 2, 8, 30
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 2 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps2_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 2 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps2_ --gpus 0 | tee results_transfer_attack_mc.txt
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps8_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps8_ --gpus 0 | tee results_transfer_attack_mc.txt
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0.25 --transfer-attack --transfer-attack-noise 0 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
 
 -----------------------------------------------------------------------------------------------
 ***Note: can be executed through the KD framework evaluate function
