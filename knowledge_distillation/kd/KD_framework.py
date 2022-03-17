@@ -475,7 +475,7 @@ class KDFramework:
 
         self.student_model.eval()
 
-        for data, target, image_indices in enumerate(tqdm(self.val_loader)):
+        for batch_index, (data, target, image_indices) in enumerate(tqdm(self.val_loader)):
             data = data.to(self.device)
             target = target.to(self.device)
 
