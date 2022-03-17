@@ -181,6 +181,7 @@ def main():
         temp=args.temperature,
         distill_weight=args.distill_weight,
         perturb_distill_weight=args.perturb_distill_weight,
+        eps=args.epsilon,
         device=args.device,
         att_object=att_object,
         attack_model=attack_model,
