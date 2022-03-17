@@ -378,7 +378,7 @@ class KDFramework:
         perturb_correct = 0
         student_teacher_correct = 0
 
-        for data, target, image_indices in self.val_loader:
+        for _, (data, target, image_indices) in enumerate(tqdm(self.train_loader)):
             data = data.to(self.device)
             target = target.to(self.device)
 
@@ -475,7 +475,7 @@ class KDFramework:
 
         self.student_model.eval()
 
-        for batch_index, (data, target, image_indices) in enumerate(tqdm(self.val_loader)):
+        for _, (data, target, image_indices) in enumerate(tqdm(self.val_loader)):
             data = data.to(self.device)
             target = target.to(self.device)
 

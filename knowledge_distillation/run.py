@@ -43,6 +43,7 @@ parser.add_argument('--la-k', type=int, default=6, help='k of lookahead.')
 parser.add_argument('--la-alpha', type=float, default=0.5, help='alpha of lookahead.')
 parser.add_argument('--train', default=False, type=bool)
 parser.add_argument('--eval-teacher', default=False, type=bool)
+parser.add_argument('--resume-path', type=str, metavar='PATH', help='path to model (default: none)')
 
 #####################
 # Attack params
@@ -86,12 +87,14 @@ def main():
     student_model = wideresnet28()
 
     if load_student_model:
-        resume_path = 'models/student.pt'  # in local : './models/student.pt' in server: 'models/student.pt'
-        print("=> loading checkpoint '{}'".format(resume_path))
-        checkpoint = torch.load(resume_path, map_location='cpu')  # map_location=device
+        # resume_path = 'models/student.pt'  # in local : './models/student.pt' in server: 'models/student.pt'
+        print("=> loading checkpoint '{}'".format(args.resume_path))
+        checkpoint = torch.load(args.resume_path, map_location='cpu')  # map_location=device
         # args.start_epoch = checkpoint['epoch'] - 1
         # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        student_model.load_state_dict(transform_checkpoint(checkpoint))
+        # student_model.load_state_dict(transform_checkpoint(checkpoint))
+        student_model.load_state_dict(torch.load(args.attack_path))
+        student_model.to(args.device)
 
     transfer_attack_obj = None
     attack_model = None
