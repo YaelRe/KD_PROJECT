@@ -108,7 +108,7 @@ def init_transfer_attack_model(args):
     return attack_model
 
 
-def load_student_model(args):
+def get_student_model(args):
     print("=> loading student model '{}'".format(args.resume_path))
     student_model = wideresnet28()
     if args.device == 'cpu':
@@ -132,7 +132,7 @@ def main():
     student_model = wideresnet28()
 
     if load_student_model:
-        student_model = load_student_model(args)
+        student_model = get_student_model(args)
 
     attack_model = None
     if args.transfer_attack:
