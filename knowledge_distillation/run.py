@@ -75,11 +75,6 @@ parser.add_argument('--experiment-name', default='exp1', type=str, help='experim
 parser.add_argument('--noise_sd', default=0, type=float)
 
 
-# args.init_norm_DDN /= 256.0
-
-# torch.manual_seed(42)
-# torch.cuda.manual_seed_all(42)
-
 def init_transfer_attack_model(args):
     print("\nTransfer attack")
     print(f"epsilon: {args.epsilon}")
@@ -97,12 +92,7 @@ def init_transfer_attack_model(args):
         args.start_epoch = checkpoint['epoch'] - 1
         attack_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
     else:
-        attack_model = wideresnet28()
-        if args.device == 'cpu':
-            checkpoint = torch.load(args.attack_path, map_location=args.device)
-            attack_model.load_state_dict(transform_checkpoint(checkpoint))
-        else:
-            attack_model.load_state_dict(torch.load(args.attack_path))
+        attack_model = get_student_model(args)
 
     attack_model.to(args.device)
 
@@ -112,15 +102,9 @@ def init_transfer_attack_model(args):
 def get_student_model(args):
     print("=> loading student model '{}'".format(args.resume_path))
     student_model = wideresnet28()
-    # if args.device == 'cpu':
-    checkpoint = torch.load(args.resume_path, map_location=args.device)  # map_location=device
-    # args.start_epoch = checkpoint['epoch'] - 1
-    # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+    checkpoint = torch.load(args.resume_path, map_location=args.device)
     student_model.load_state_dict(transform_checkpoint(checkpoint))
     student_model.to(args.device)
-    # else:
-    #     student_model.load_state_dict(torch.load(args.attack_path))
-    #     student_model.to(args.device)
 
     return student_model
 
