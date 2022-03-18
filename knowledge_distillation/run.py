@@ -116,6 +116,7 @@ def get_student_model(args):
     # args.start_epoch = checkpoint['epoch'] - 1
     # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
     student_model.load_state_dict(transform_checkpoint(checkpoint))
+    student_model.to(args.device)
     # else:
     #     student_model.load_state_dict(torch.load(args.attack_path))
     #     student_model.to(args.device)
