@@ -98,12 +98,12 @@ def init_transfer_attack_model(args):
         attack_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
     else:
         attack_model = wideresnet28()
-        # if args.device == 'cpu':
-        checkpoint = torch.load(args.attack_path, map_location=args.device)
-        attack_model.load_state_dict(transform_checkpoint(checkpoint))
-        # else:
-        #     attack_model.load_state_dict(torch.load(args.attack_path))
-        #     attack_model.to(args.device)
+        if args.device == 'cpu':
+            checkpoint = torch.load(args.attack_path, map_location=args.device)
+            attack_model.load_state_dict(transform_checkpoint(checkpoint))
+        else:
+            attack_model.load_state_dict(torch.load(args.attack_path))
+            attack_model.to(args.device)
 
     return attack_model
 
@@ -111,14 +111,14 @@ def init_transfer_attack_model(args):
 def get_student_model(args):
     print("=> loading student model '{}'".format(args.resume_path))
     student_model = wideresnet28()
-    if args.device == 'cpu':
-        checkpoint = torch.load(args.resume_path, map_location='cpu')  # map_location=device
-        # args.start_epoch = checkpoint['epoch'] - 1
-        student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        student_model.load_state_dict(transform_checkpoint(checkpoint))
-    else:
-        student_model.load_state_dict(torch.load(args.attack_path))
-        student_model.to(args.device)
+    # if args.device == 'cpu':
+    checkpoint = torch.load(args.resume_path, map_location=args.device)  # map_location=device
+    # args.start_epoch = checkpoint['epoch'] - 1
+    student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+    student_model.load_state_dict(transform_checkpoint(checkpoint))
+    # else:
+    #     student_model.load_state_dict(torch.load(args.attack_path))
+    #     student_model.to(args.device)
 
     return student_model
 
