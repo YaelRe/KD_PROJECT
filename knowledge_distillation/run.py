@@ -114,7 +114,7 @@ def get_student_model(args):
     # if args.device == 'cpu':
     checkpoint = torch.load(args.resume_path, map_location=args.device)  # map_location=device
     # args.start_epoch = checkpoint['epoch'] - 1
-    student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+    # student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
     student_model.load_state_dict(transform_checkpoint(checkpoint))
     # else:
     #     student_model.load_state_dict(torch.load(args.attack_path))
