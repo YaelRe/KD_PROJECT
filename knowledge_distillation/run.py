@@ -103,7 +103,8 @@ def init_transfer_attack_model(args):
             attack_model.load_state_dict(transform_checkpoint(checkpoint))
         else:
             attack_model.load_state_dict(torch.load(args.attack_path))
-            attack_model.to(args.device)
+
+    attack_model.to(args.device)
 
     return attack_model
 
