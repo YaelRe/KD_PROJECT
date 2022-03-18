@@ -7,6 +7,7 @@ import argparse
 from models.wideresnet import wideresnet28
 from attacks import PGD
 from data_loaders.cifar_data import get_loaders
+from smoothing.smooth import Smooth
 from util.cross_entropy import CrossEntropyLoss
 from util.lookahead import Lookahead
 from torch.optim.lr_scheduler import MultiStepLR
@@ -71,52 +72,70 @@ parser.add_argument('--random-start', default=True, type=bool)
 parser.add_argument('--transfer-attack', action='store_true', default=False, help='Use transfer attack')
 parser.add_argument('--attack-path', type=str, metavar='PATH', help='path to attack model (default: none)')
 parser.add_argument('--experiment-name', default='exp1', type=str, help='experiment name')
-parser.add_argument('--noise_sd', default=8, type=float)
+parser.add_argument('--noise_sd', default=0, type=float)
 
-# args.epsilon /= 256.0
+
 # args.init_norm_DDN /= 256.0
 
 # torch.manual_seed(42)
 # torch.cuda.manual_seed_all(42)
 
+def init_transfer_attack_model(args):
+    print("\nTransfer attack")
+    print(f"epsilon: {args.epsilon}")
+    print(f"attack model: {args.attack_path}")
+    print(f"experiment name: {args.experiment_name}")
+    if "tar" in args.attack_path:
+        add_params = {'weight_noise': True, 'act_noise_a': False, 'act_noise_b': False,
+                      'rank': 5, 'noised_strength': 0.25, 'noisef_strength': 0.1,
+                      'num_classes': 10, 'width': 4.0}
+        smoothing_args = {'noise_sd': args.noise_sd, 'm_forward': args.m_forward, 'smooth': 'mcpredict',
+                          'normalization': 'cifar10'}
+        attack_model = Smooth(wideresnet28(**add_params), **smoothing_args)
+        checkpoint = torch.load(args.attack_path, map_location=args.device)
+        args.start_epoch = checkpoint['epoch'] - 1
+        attack_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+    else:
+        attack_model = wideresnet28()
+        if args.device == 'cpu':
+            checkpoint = torch.load(args.attack_path, map_location=args.device)
+            attack_model.load_state_dict(transform_checkpoint(checkpoint))
+        else:
+            attack_model.load_state_dict(torch.load(args.attack_path))
+            attack_model.to(args.device)
+
+    return attack_model
+
+
+def load_student_model(args):
+    print("=> loading student model '{}'".format(args.resume_path))
+    student_model = wideresnet28()
+    if args.device == 'cpu':
+        checkpoint = torch.load(args.resume_path, map_location='cpu')  # map_location=device
+        # args.start_epoch = checkpoint['epoch'] - 1
+        student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
+        student_model.load_state_dict(transform_checkpoint(checkpoint))
+    else:
+        student_model.load_state_dict(torch.load(args.attack_path))
+        student_model.to(args.device)
+
+    return student_model
+
 
 def main():
     args = parser.parse_args()
+    if not torch.cuda.is_available():
+        args.device = 'cpu'
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     load_student_model = args.load_student_model
     student_model = wideresnet28()
 
     if load_student_model:
-        print("=> loading student model '{}'".format(args.resume_path))
-        if args.device == 'cpu':
-            checkpoint = torch.load(args.resume_path, map_location='cpu')  # map_location=device
-            # args.start_epoch = checkpoint['epoch'] - 1
-            student_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-            student_model.load_state_dict(transform_checkpoint(checkpoint))
-        else:
-            student_model.load_state_dict(torch.load(args.attack_path))
-            student_model.to(args.device)
+        student_model = load_student_model(args)
 
     attack_model = None
     if args.transfer_attack:
-        print("\nTransfer attack")
-        print(f"epsilon: {args.epsilon}")
-        print(f"attack model: {args.attack_path}")
-        print(f"experiment name: {args.experiment_name}")
-        # if "tar" in resume_path:
-        #     checkpoint = torch.load(resume_path, map_location=device)
-        #     args.start_epoch = checkpoint['epoch'] - 1
-        #     model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
-        #     logger.info("=> loaded checkpoint '{}' (epoch {})".format(resume_path, checkpoint['epoch']))
-        # else:
-        print(f"=> Loading attack model: {args.attack_path}")
-        attack_model = wideresnet28()
-        if args.device == 'cpu':
-            checkpoint = torch.load(args.attack_path, map_location='cpu')  # map_location=device
-            attack_model.load_state_dict(transform_checkpoint(checkpoint))
-        else:
-            attack_model.load_state_dict(torch.load(args.attack_path))
-            attack_model.to(args.device)
+        attack_model = init_transfer_attack_model(args)
 
     teacher_data = td.TeacherData(data_dic={'hist_data': args.hist_data,
                                             'soft_data': args.soft_data},

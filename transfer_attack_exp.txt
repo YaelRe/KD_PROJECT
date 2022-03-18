@@ -71,7 +71,7 @@ srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresn
 srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0 --transfer-attack --transfer-attack-noise 0.25 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_scni_cni_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
 
 -----------------------------------------------------------------------------------------------
-***Note: can be executed through the KD framework evaluate function
+**DONE**
 student -> student
 noise_sd = 0
 epsilon = 2, 8, 30
@@ -88,11 +88,11 @@ cni -> student
 cni: noise_sd = 0
 epsilon = 2, 8, 30
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 2 --noise_sd 0 --transfer-attack --resume knowledge_distillation/kd_models/student_20220227-175932.pt --save results_transfer_attack_cni --experiment-name transfer_attack_cni_student_eps2_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/kd_models/student_20220227-175932.pt --transfer-attack --epsilon 2 --noise_sd 0 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_cni_sudent_eps2_
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --resume knowledge_distillation/kd_models/student_20220227-175932.pt --save results_transfer_attack_cni --experiment-name transfer_attack_cni_student_eps8_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/kd_models/student_20220227-175932.pt --transfer-attack --epsilon 8 --noise_sd 0 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_cni_sudent_eps8_
 
-srun -c 2 --gres=gpu:1 --pty ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 30 --noise_sd 0 --transfer-attack --resume knowledge_distillation/kd_models/student_20220227-175932.pt --save results_transfer_attack_cni --experiment-name transfer_attack_cni_student_eps30_ --gpus 0 | tee results_transfer_attack_mc.txt
+srun -c 2 --gres=gpu:1 --pty ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/kd_models/student_20220227-175932.pt --transfer-attack --epsilon 30 --noise_sd 0 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_cni_sudent_eps30_
 
 -----------------------------------------------------------------------------------------------
 **EDIT

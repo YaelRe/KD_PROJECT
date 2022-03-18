@@ -346,7 +346,6 @@ def main():
 
     attack_model = None
     if args.transfer_attack:
-        # TODO: create attack model
         attack_model, _ = init_model(args, args.transfer_attack_noise, m_forward, add_args, device, dtype)
 
     att_object = args.attack(model, criterion, **args.attacks_add_params[0])
