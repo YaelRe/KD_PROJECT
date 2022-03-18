@@ -83,6 +83,7 @@ parser.add_argument('--noise_sd', default=0, type=float)
 def init_transfer_attack_model(args):
     print("\nTransfer attack")
     print(f"epsilon: {args.epsilon}")
+    print(f"noise_sd: {args.noise_sd}")
     print(f"attack model: {args.attack_path}")
     print(f"experiment name: {args.experiment_name}")
     if "tar" in args.attack_path:
