@@ -98,12 +98,12 @@ def init_transfer_attack_model(args):
         attack_model.load_state_dict(transform_checkpoint(checkpoint['state_dict']))
     else:
         attack_model = wideresnet28()
-        if args.device == 'cpu':
-            checkpoint = torch.load(args.attack_path, map_location=args.device)
-            attack_model.load_state_dict(transform_checkpoint(checkpoint))
-        else:
-            attack_model.load_state_dict(torch.load(args.attack_path))
-            attack_model.to(args.device)
+        # if args.device == 'cpu':
+        checkpoint = torch.load(args.attack_path, map_location=args.device)
+        attack_model.load_state_dict(transform_checkpoint(checkpoint))
+        # else:
+        #     attack_model.load_state_dict(torch.load(args.attack_path))
+        #     attack_model.to(args.device)
 
     return attack_model
 
