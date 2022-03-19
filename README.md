@@ -82,7 +82,7 @@ Results for transfer attack using epsilon = 8/255.
 |CNI| CNI| 88.72| 63.67|
 |Smoothed CNI| CNI| 42.76| 42.61|
 |KD student| CNI| 88.76| 63.4|
-|CNI| Smoothed CNI| 88.74| 88.66|
+|CNI| Smoothed CNI| 42.6| 42.62|
 |Smoothed CNI| Smoothed CNI| 42.81| 36.58|
 |KD student| Smoothed CNI|42.74 |32.95 |
 |CNI| KD student| 79.92| 69.3|
