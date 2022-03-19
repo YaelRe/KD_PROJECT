@@ -93,6 +93,12 @@ These result show that using Knowledge Distillation the student model was abel t
 Black-Box attack on the CNI model. Read our project report to learn more.
 
 
+## TODO:
+<ol>
+ <li> Add link to experiment excel </li>
+ <li> Add link to PDF </li>
+ <li> Add graphs </li>
+ </ol>
 
 
 
