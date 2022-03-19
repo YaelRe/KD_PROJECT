@@ -59,7 +59,7 @@ To run transfer attack the following parameters need to be incorporated:
 <li>--transfer-attack</li>
 <li>--attack-path [path to the model that the attack will be create on]</li>
 
-Use the following command to run a transfer attack: 
+Use the following command to run a transfer attack - target model is CNI or Smoothed CNI: 
 ```
 ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --eps 8 --noise_sd 0 --transfer-attack --attack-path knowledge_distillation/kd_models/student_20220227-175932.pt --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_transfer_attack_cni --experiment-name transfer_attack_student_cni_eps8 --gpus 0 
 ```
@@ -67,6 +67,12 @@ ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --b
 Parameters we experimented on:
 <li>--eps - values we used: 2, 8, 30</li>
 <li>--noise-sd - this param determines if the model is smoothed cni [0.25] or cni [0]</li>
+
+Use the following command to run a transfer attack - target model is KD student: 
+```
+ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/kd_models/student_20220227-175932.pt --transfer-attack --epsilon 8 --noise_sd 0.25 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_scni_sudent_eps8_
+```
+
 
 ### Results of Transfer Attack
 Results for transfer attack using epsilon = 8/255.
