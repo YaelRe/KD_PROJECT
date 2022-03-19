@@ -98,6 +98,8 @@ Black-Box attack on the CNI model. Read our project report to learn more.
  <li> Add link to experiment excel </li>
  <li> Add link to PDF </li>
  <li> Add graphs </li>
+ <li> Add refrences </li>
+ <li> Add system requierments </li>
  </ol>
 
 
