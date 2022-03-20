@@ -102,15 +102,5 @@ Black-Box attack on the CNI and Smoothed models. Read our project paper to learn
 [2] [Distilling the Knowledge in a Neural Network](https://arxiv.org/pdf/1503.02531.pdf)\
 [3] [Towards Deep Learning Models Resistant to Adversarial Attacks](https://openreview.net/forum?id=rJzIBfZAb)
 
-## TODO:
-<ol>
- <li> Add link to experiment excel </li>
- <li> Add link to PDF </li>
- <li> Add graphs </li>
- <li> Add references </li>
- <li> Add system requirements </li>
- </ol>
-
-
 
 
