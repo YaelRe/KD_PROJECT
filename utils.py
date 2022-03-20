@@ -140,6 +140,8 @@ def get_args():
     # transfer attack
     parser.add_argument('--transfer-attack', action='store_true', default=False, help='Use transfer attack')
     parser.add_argument('--attack-path', type=str, metavar='PATH', help='path to attack model (default: none)')
+    parser.add_argument('--transfer-attack-noise', type=float, default=0, metavar='TASD',
+                        help='noise standard variation for transfer attack smooth model')
 
     args = parser.parse_args()
 
