@@ -98,8 +98,8 @@ These result show that using Knowledge Distillation the student model was abel t
 Black-Box attack on the CNI and Smoothed models. Read our project paper to learn more.
 
 ## References
-[1] [Smoothed Inference for Improving Adversarial Robustness](https://arxiv.org/pdf/1911.07198.pdf)
-[2] [Distilling the Knowledge in a Neural Network](https://arxiv.org/pdf/1503.02531.pdf)
+[1] [Smoothed Inference for Improving Adversarial Robustness](https://arxiv.org/pdf/1911.07198.pdf)\
+[2] [Distilling the Knowledge in a Neural Network](https://arxiv.org/pdf/1503.02531.pdf)\
 [3] [Towards Deep Learning Models Resistant to Adversarial Attacks](https://openreview.net/forum?id=rJzIBfZAb)
 
 ## TODO:
