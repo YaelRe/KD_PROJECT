@@ -59,7 +59,7 @@ ipython ./knowledge_distillation/run.py -- --adv_training True  --learning-rate 
 |KD soft prediction smoothing | 82.13| 45.83|
 
 ## Transfer Attack
-To run transfer attack the following parameters need to be incorporated:
+To run a transfer attack the following parameters need to be incorporated:
 <li>--transfer-attack</li>
 <li>--attack-path [path to the model that the attack will be create on]</li>
 
