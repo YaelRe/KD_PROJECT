@@ -8,7 +8,7 @@ and can perform on perturbed data similar to the smoothed model. We used the sof
 combined it with the adversarial training proposed by Madry et al. [3]
 
 In addition we explored transfer-based attacks, we wanted to see if the student model had learned a weakness in Nemcovsky et al. [1] model
-that could be exploited to create a black-box attack. To test this hypothesis we generated the PGD attack on the best performing student models, the one that was trained on soft prediction smoothing output, and then tested the attack on both the CNI and Smoothed CNI models
+that could be exploited to create a black-box attack. To test this hypothesis we generated the PGD attack on the best performing student model, the one that was trained on soft prediction smoothing output, and then tested the attack on both the CNI and Smoothed CNI models.
 
 ## Get smoothed model outputs data
 In order to run knowledge distillation trainig we need to get the smoothed model outputs.
