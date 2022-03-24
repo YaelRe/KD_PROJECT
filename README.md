@@ -60,8 +60,8 @@ ipython ./knowledge_distillation/run.py -- --adv_training True  --learning-rate 
 
 ## Transfer Attack
 To run a transfer attack the following parameters need to be incorporated:
-<li>--transfer-attack</li>
-<li>--attack-path [path to the model that the attack will be create on]</li>
+- --transfer-attack
+- --attack-path [path to the model that the attack will be create on]
 
 #### Use the following command to run a transfer attack - target model is CNI or Smoothed CNI: 
 ```
@@ -69,9 +69,9 @@ ipython run_attack.py -- --seed 42  --arch wideresnet --width 4 --layers 28  --b
 ```
 
 Parameters we experimented on:
-<li>--eps - values we used: 2, 8, 30</li>
-<li>--noise-sd - this param determines if the model is smoothed cni [0.25] or cni [0]</li>
-<li>--transfer-attack-noise - makes the attack model a smoothed cni model </li>
+- --eps - values we used: 2, 8, 30
+- --noise-sd - this param determines if the model is smoothed cni [0.25] or cni [0]
+- --transfer-attack-noise - makes the attack model a smoothed cni model
 
 #### Use the following command to run a transfer attack - target model is KD student: 
 ```
