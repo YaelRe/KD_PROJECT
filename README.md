@@ -71,7 +71,7 @@ Parameters we experimented on:
 
 #### Use the following command to run a transfer attack - target model is KD student: 
 ```
-ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/kd_models/student_20220227-175932.pt --transfer-attack --epsilon 8 --noise_sd 0.25 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_scni_sudent_eps8_
+ipython ./knowledge_distillation/run.py -- --learning-rate 0.0001 --loss CrossEntropy --opt ADAM  --hist_data True --distill_weight 0.75 --perturb_distill_weight 0.25 --load-student-model True --resume-path knowledge_distillation/modelsels/student_20220227-175932.pt --transfer-attack --epsilon 8 --noise_sd 0.25 --attack-path trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --experiment-name transfer_attack_scni_sudent_eps8_
 ```
 
 
@@ -92,16 +92,6 @@ Results for transfer attack using epsilon = 8/255.
 
 These result show that using Knowledge Distillation the student model was abel to learn a successful 
 Black-Box attack on the CNI and Smoothed models. Read our project paper to learn more.
-
-
-## TODO:
-<ol>
- <li> Add link to experiment excel </li>
- <li> Add link to PDF </li>
- <li> Add graphs </li>
- <li> Add references </li>
- <li> Add system requirements </li>
- </ol>
 
 
 

@@ -199,7 +199,7 @@ def main():
     if args.train:
         soft_target_KD.train_student(epochs=args.epochs,
                                      save_model=True,
-                                     save_model_pth=f"knowledge_distillation/kd_models/student_{current_time}.pt")
+                                     save_model_pth=f"knowledge_distillation/models/student_{current_time}.pt")
         soft_target_KD.evaluate()
 
     if args.eval_teacher:

@@ -104,7 +104,7 @@ class KDFramework:
             self,
             epochs=10,
             save_model=True,
-            save_model_pth="knowledge_distillation/kd_models/student.pt",
+            save_model_pth="knowledge_distillation/models/student.pt",
     ):
         """
         Function to train student model - for internal use only.
@@ -191,7 +191,7 @@ class KDFramework:
             self,
             epochs=10,
             save_model=True,
-            save_model_pth="knowledge_distillation/kd_models/student.pt",
+            save_model_pth="knowledge_distillation/models/student.pt",
     ):
         """
         Function to train student model - for internal use only.
