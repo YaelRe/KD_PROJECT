@@ -1,24 +1,28 @@
 # Knowledge Distillation via Smoothed Models and Adversarial Robustness
 
-This project came to pass as a continuation of the nemcovsky et al.(..) paper. 
-The smoothed model is a non-deterministic, cumbersome model which achieved significant performance boost for perturbations.
-In our project we explore the possibility of using Knowledge distillation via the smoothed model, to create a student model, that is deterministic 
-and can perform on perturbed data similar to the smoothed model or even better. 
+This project came to pass as a continuation of the Nemcovsky et al.[1] research. 
+In thier project they showed that combining smoothing along with randomization approaches and adversarial training can improve the robustness to adversarial attacks.
 
+In our project we explored the possibility of using Knowledge distillation via the smoothed model from [1], to create a student model, that is deterministic 
+and can perform on perturbed data similar to the smoothed model. We used the soft targets KD method that was developed by Hinton et al. [2] and
+combined it with the adversarial training proposed by Madry et al. [3]
 
+In addition we explored transfer-based attacks, we wanted to see if the student model had learned a weakness in Nemcovsky et al. [1] model
+that could be exploited to create a black-box attack. To test this hypothesis we generated the PGD attack on the best performing student model, the one that was trained on soft prediction smoothing output, and then tested the attack on both the CNI and Smoothed CNI models.
 
 ## Get smoothed model outputs data
 In order to run knowledge distillation trainig we need to get the smoothed model outputs.
+
 There are two types of aggregated outputs that can be retrived with the following command lines:
 
  ### Smoothed Prediction
  
  ```
-ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
+ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar 
 ```
  ### Soft smoothed Prediction
   ```
-ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni  --attack pgd --attack_k 10 --alpha 0.006 --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar --save results_w_csv.txt --gpus 0 
+ipython run_attack.py -- --seed 42 --arch wideresnet --width 4 --layers 28 --batch-size 256 --cpni --smooth mcpredict --m_forward 512 --resume trained_models/cpni/CPNI_wide4_offd_decay_1e-3_time_2020-03-14_16-58-12/model_best.pth.tar
 ```
 
 --resume variable should contain the path of the model_best.pth.tar file
@@ -34,7 +38,7 @@ There are two types of aggregated outputs for the teacher model:
   - Smoothe Prediction
     - To use this model outputs add this variable: --hist_data true  
   - Soft smoothe Prediction
-    - To use this model outputs add this variable: --soft_data true  
+    - To use this model outputs add this variable: --soft_data true and remove --hist_data true 
 
  
 
@@ -55,7 +59,7 @@ ipython ./knowledge_distillation/run.py -- --adv_training True  --learning-rate 
 |KD soft prediction smoothing | 82.13| 45.83|
 
 ## Transfer Attack
-To run transfer attack the following parameters need to be incorporated:
+To run a transfer attack the following parameters need to be incorporated:
 <li>--transfer-attack</li>
 <li>--attack-path [path to the model that the attack will be create on]</li>
 
@@ -91,8 +95,12 @@ Results for transfer attack using epsilon = 8/255.
 |KD student| KD student| 79.92| 46.06|
 
 These result show that using Knowledge Distillation the student model was abel to learn a successful 
-Black-Box attack on the CNI and Smoothed models. Read our project paper to learn more.
+Black-Box attack on the CNI and Smoothed models. Read our project [papar](Knowledge_Distillation_via_Smoothed_Models_and_Adversarial.pdf)  to learn more.
 
+## References
+[1] [Smoothed Inference for Improving Adversarial Robustness](https://arxiv.org/pdf/1911.07198.pdf)\
+[2] [Distilling the Knowledge in a Neural Network](https://arxiv.org/pdf/1503.02531.pdf)\
+[3] [Towards Deep Learning Models Resistant to Adversarial Attacks](https://openreview.net/forum?id=rJzIBfZAb)
 
 
 
