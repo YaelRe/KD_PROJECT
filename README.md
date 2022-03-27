@@ -95,6 +95,7 @@ Results for transfer attack using epsilon = 8/255.
 |KD student| KD student| 79.92| 46.06|
 
 These results show that using Knowledge Distillation the student model was able to learn a successful Black-Box attack on the CNI and Smoothed CNI models. Also, interestingly the student model performed well as the target model when the CNI and Smoothed CNI created the attacks.
+
 Read our project [papar](Knowledge_Distillation_via_Smoothed_Models_and_Adversarial.pdf)  to learn more.
 
 ## References
