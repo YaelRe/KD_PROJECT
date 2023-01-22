@@ -1,7 +1,7 @@
 # Knowledge Distillation via Smoothed Models and Adversarial Robustness
 
 This project came to pass as a continuation of the Nemcovsky et al.[1] research. 
-In thier project they showed that combining smoothing along with randomization approaches and adversarial training can improve the robustness to adversarial attacks.
+In their project they showed that combining smoothing along with randomization approaches and adversarial training can improve the robustness to adversarial attacks.
 
 In our project we explored the possibility of using Knowledge distillation via the smoothed model from [1], to create a student model, that is deterministic 
 and can perform on perturbed data similar to the smoothed model. We used the soft targets KD method that was developed by Hinton et al. [2] and
